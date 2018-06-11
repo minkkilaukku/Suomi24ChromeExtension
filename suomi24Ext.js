@@ -201,7 +201,11 @@ removeUsersPosts( getUsersToRemoveAlways() );
 highlightUserPosts( getStoredUserHighlights() );
 //console.log("removing users "+ getUsersToRemoveAlways() +" always");
 
+addCollapsing();
 
+
+
+//console.log("Chrome.extension: ", chrome.extension);
 
 
 

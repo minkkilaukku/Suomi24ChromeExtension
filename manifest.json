@@ -5,7 +5,8 @@
     "content_scripts": [
         {
             "matches": ["https://keskustelu.suomi24.fi/*"],
-            "js": ["suomi24Ext.js" ]
+            "css": ["suomi24Ext.css"],
+            "js": [ "makeCollapse.js", "suomi24Ext.js" ]
         }
     ],
     /*
@@ -21,8 +22,12 @@
     },
     
     "permissions": [
-      "storage"
-    ]
+        "storage",
+        "tabs",
+        "<all_urls>"
+    ],
+    
+    "web_accessible_resources": ["collapse.png", "expand.png"]
     
 }
 

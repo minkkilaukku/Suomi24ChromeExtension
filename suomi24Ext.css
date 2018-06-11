@@ -1,0 +1,41 @@
+.collapseButton {
+    display: block;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background-size: 20px 20px;
+    background-position: top left;
+    background-repeat: no-repeat;
+    background-color: transparent;
+}
+
+.collapseButton:hover {
+    transform: scale(1.1, 1.1);
+}
+
+.collapseButton[collapsed="false"] {
+    /*background: rgba(0, 255, 0, 0.5);*/
+    /*background: transparent url(expand.png) no-repeat top left; 
+    won't work, need:
+    chrome.extension.getURL("expand.png");*/
+}
+
+
+.collapseButton[collapsed="true"] {
+    /*background: rgba(0, 255, 0, 0.5);*/
+    /*background: transparent url(collapse.png) no-repeat top left; */
+}
+
+
+.comments-container {
+    transform-origin: top;
+    transition: height 0.3s ease-out, transform 0.3s ease-out;
+}
+
+.comments-container.hiddenWithLankkiMiukku {
+    transform-origin: top;
+    transition: height 0.3s ease-out, transform 0.3s ease-out;
+    height: 0;
+    transform: scale(1, 0);
+    
+}
