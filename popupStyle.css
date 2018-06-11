@@ -1,0 +1,37 @@
+#alwaysRemoveUsersLab {
+    display: block;
+    margin-top: 7px;
+}
+
+#alwaysRemoveUsersContainer {
+    overflow-y: auto;
+    overflow-x: auto;
+    max-height: 200px;
+    max-width: 180px;
+}
+
+#alwaysRemoveUsersContainer p {
+    margin: 0;
+    font: 12px Helvetica;
+}
+
+#alwaysRemoveUsersContainer p:hover {
+    border: 1px solid blue;
+}
+
+#alwaysRemoveUsersContainer p:nth-child(odd) {
+    background: lightblue;
+}
+
+#alwaysRemoveUsersContainer p:nth-child(even) {
+    background: lightcyan;
+}
+
+
+button {
+    margin-top: 7px;
+}
+
+#clearAlwaysRemoveButton {
+    font: 10px Helvetica;
+}
