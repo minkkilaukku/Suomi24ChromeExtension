@@ -11,6 +11,12 @@
     
 <body>
     
+    <div id="tabs">
+        <span active="true"> Piilota </span>
+        <span active="false"> Korosta </span>
+    </div>
+    
+    <div id="hidePosts">
     <label>Käyttäjät: <input id="userNamesInput" type="text"></label>
 
     <br>
@@ -20,11 +26,33 @@
     <button id="alwaysRemoveUsersPostsButton">Poista viestit aina</button>
 
     <label id="alwaysRemoveUsersLab"> Poistetaan aina: <span style="font: 9px Helvetica;">(klikkaa peruaksesi)</span>
+        
     <div id="alwaysRemoveUsersContainer">
+    </div>
+        
+    </label>
+    <button id="clearAlwaysRemoveButton">Tyhjennä aina-poistettavat</button>
         
     </div>
-    </label>
-    <button id="clearAlwaysRemoveButton">Tyhjennä aina poistettavat</button>
-    <script src="popup.js"></script>
 
+    
+    <div id="highlightPosts" style="display: none;">
+        <label id="hlNameLab">Käyttäjä: <input id="hlNameInput"> </label>
+        <br>
+        <label>Väri: <input id="hlColorInput" type="color" value="#ffffff"> </label>
+        <br>
+        <button id="hlSetButton">Aseta</button>
+        <br>
+        
+        <label id="hlListLabel"> Asetetut:</label>
+        <div id="hlList">
+        </div>
+        <button id="clearAllHlsButton">Poista kaikki korostukset</button>
+            
+    </div>
+    
+    
+    
+    
+    <script src="popup.js"></script>
 </body>

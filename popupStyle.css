@@ -1,3 +1,4 @@
+
 #alwaysRemoveUsersLab {
     display: block;
     margin-top: 7px;
@@ -6,8 +7,8 @@
 #alwaysRemoveUsersContainer {
     overflow-y: auto;
     overflow-x: auto;
-    max-height: 200px;
-    max-width: 180px;
+    max-height: 280px;
+    max-width: 210px;
 }
 
 #alwaysRemoveUsersContainer p {
@@ -35,3 +36,85 @@ button {
 #clearAlwaysRemoveButton {
     font: 10px Helvetica;
 }
+
+
+
+#tabs {
+    background: #999;
+    margin-bottom: 10px;
+    width: 100%;
+    margin: 0;
+    margin-bottom: 18px;
+    -webkit-user-select: none;
+}
+
+#tabs span{
+    display: inline-block;
+    background: #999;
+    border: 2px solid black;
+    padding: 4px;
+    font: 14px Helvetica;
+    width: 40%;
+    cursor: pointer;
+}
+
+#tabs span[active="true"]  {
+    background: #99f;
+}
+
+#tabs span:hover[active="false"]  {
+    background: rgba(120, 120, 255, 0.4);
+}
+
+
+
+
+
+
+
+
+#hlListLabel  {
+    display: inline-block;
+    margin-top: 14px;
+}
+
+#hlList {
+    max-height: 280px;
+    max-width: 210px;
+    overflow: auto;
+}
+
+
+
+.hlListElem input {
+    display: inline-block;
+    margin-left: 4px;
+    max-width: 20px;
+}
+
+.hlListElem:nth-child(odd) {
+    background: lightblue;
+}
+
+.hlListElem:nth-child(even) {
+    background: lightcyan;
+}
+
+.hlListElem button {
+    color: red;
+    font-size: 10px;
+    margin-left: 5px;
+    line-height: 16px;
+}
+
+.hlListElem label {
+    font-size: 12px;
+    font-weight: bold;
+}
+
+#clearAllHlsButton {
+    margin-top: 7px;
+    font-size: 10px;
+}
+
+

@@ -1,5 +1,5 @@
 const USERS_TO_REMOVE_STORAGE_NAME = "lankki_miukku_aina_poistettavat_nimet";
-
+const USERS_HIGHLIGHTS_STORAGE_NAME = "lankki_miukku_korostus_värit";
 
 var makeRemovedP = function(userName, type="viesti") {
     var remNode = document.createElement("p");
@@ -78,6 +78,59 @@ var removeUsersPosts = function(userNames) {
 };
 
 
+/**
+*  @param hlMap: object where keys are user names and values the color to use highlighting
+*/
+var highlightUserPosts = function(hlMap) {
+    
+    var foundNames = Array.from(document.querySelectorAll("p.user-info-name")).map(x=>x.textContent.trim());
+    var handlePostElement = function(elem, type="viesti") {
+        let userNameCont = elem.getElementsByClassName("user-info-name")[0];
+        if (userNameCont) {
+            let nameLinks = userNameCont.getElementsByTagName("a"); //registered users' name inside a
+            let userNameOfElem;
+            if (nameLinks[0]) {
+                userNameOfElem = nameLinks[0].textContent.trim();
+            } else {
+                userNameOfElem = userNameCont.textContent.trim();
+            }
+            
+            elem.style.background = hlMap[userNameOfElem] || "";
+            
+        }
+    };
+    
+    var startMsgHead = document.querySelectorAll(".user-info-big")[0];
+    var startMsg = document.querySelectorAll(".thread-text")[0];
+    var answers = document.querySelectorAll(".answer-container");
+    var comments = document.querySelectorAll(".comment-container");
+    if (startMsgHead) {
+        let nameOfElem;
+        let nameLinks = startMsgHead.getElementsByTagName("a");
+        if (nameLinks[0]) {
+            nameOfElem = nameLinks[0].textContent.trim();
+        } else {
+            nameOfElem = startMsgHead.getElementsByTagName("p")[0].textContent.trim();
+        }
+        
+        startMsgHead.style.background = hlMap[nameOfElem] || "";
+        startMsg.style.background = hlMap[nameOfElem] || "";
+        
+    }
+    
+    for (let ans of answers) {
+        handlePostElement(ans, "viesti");
+    }
+    
+    for (let comm of comments) {
+        handlePostElement(comm, "kommentti");
+    }
+    
+};
+
+
+
+
 
 chrome.runtime.onMessage.addListener(gotMessage);
 
@@ -90,13 +143,18 @@ function gotMessage(msg, sender, sendResponse) {
         if (msg.removeAlways == true) {
             addUsersToRemoveAlways(msg.userNames)
         }
-    } else if (msg.getAlwaysRemoveUsers == true) {
+    } else if (msg.getAlwaysRemoveUsers) {
         sendResponse(getUsersToRemoveAlways());
         //console.log("got queried about the always-to-remove users: "+getUsersToRemoveAlways());
-    } else if (msg.removeFromAlwaysToRemove == true) {
+    } else if (msg.removeFromAlwaysToRemove) {
         removeUsersToRemoveAlways(msg.userNames);
-    } else if (msg.clearAlwaysRemoves == true) {
+    } else if (msg.clearAlwaysRemoves) {
         setUsersToRemoveAlways([]);
+    } else if (msg.highlightUsers) {
+        highlightUserPosts(msg.hlMap);
+        storeUserHighlights(msg.hlMap);
+    } else if (msg.getUserHighlights) {
+        sendResponse(getStoredUserHighlights());
     }
     
     
@@ -127,9 +185,20 @@ var getUsersToRemoveAlways = function() {
 };
 
 
+var storeUserHighlights = function(hlMap) {
+    localStorage.setItem(USERS_HIGHLIGHTS_STORAGE_NAME, JSON.stringify(hlMap));
+    
+}
+
+var getStoredUserHighlights = function() {
+    return JSON.parse(localStorage.getItem(USERS_HIGHLIGHTS_STORAGE_NAME)) || {};
+    
+}
+
+
 
 removeUsersPosts( getUsersToRemoveAlways() );
-
+highlightUserPosts( getStoredUserHighlights() );
 //console.log("removing users "+ getUsersToRemoveAlways() +" always");
 
 
