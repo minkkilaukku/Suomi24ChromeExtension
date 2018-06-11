@@ -1,2 +1,2 @@
-console.log("Hello from background!");
+//nothing here
 
