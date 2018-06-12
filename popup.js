@@ -160,12 +160,60 @@ var updateUserHighlights = function() {
 chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
     chrome.tabs.sendMessage(tabs[0].id, {getUserHighlights: true}, function(response) {
         if (response) {
-            debugger;
             for (let uN of Object.getOwnPropertyNames(response)) {
                 addUserHl(uN, response[uN]);
             }
         }
     });
 });
+
+//--------------------------------------------------------------------------------------------
+
+
+var hideAutoComplete;
+var hlAutoComplete;
+
+
+//---- get username hints --------------------------------------
+chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+    chrome.tabs.sendMessage(tabs[0].id, {getHintUsers: true}, function(response) {
+        console.log("got response "+response);
+        if (response) {
+            hideAutoComplete = new autoComplete({
+                selector: userNameInput,
+                minChars: 1,
+                source: function(term, suggest){
+                    term = term.toLowerCase();
+                    var choices = response;
+                    var matches = [];
+                    for (i=0; i<choices.length; i++)
+                        if (~choices[i].toLowerCase().indexOf(term)) matches.push(choices[i]);
+                    suggest(matches);
+                }
+            });
+            
+            hlAutoComplete = new autoComplete({
+                selector: hLNameInput,
+                minChars: 1,
+                source: function(term, suggest){
+                    term = term.toLowerCase();
+                    var choices = response;
+                    var matches = [];
+                    for (i=0; i<choices.length; i++)
+                        if (~choices[i].toLowerCase().indexOf(term)) matches.push(choices[i]);
+                    suggest(matches);
+                }
+            });
+            
+        }
+    });
+});
+
+
+
+
+
+
+
 
 

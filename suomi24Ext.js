@@ -83,7 +83,7 @@ var removeUsersPosts = function(userNames) {
 */
 var highlightUserPosts = function(hlMap) {
     
-    var foundNames = Array.from(document.querySelectorAll("p.user-info-name")).map(x=>x.textContent.trim());
+    
     var handlePostElement = function(elem, type="viesti") {
         let userNameCont = elem.getElementsByClassName("user-info-name")[0];
         if (userNameCont) {
@@ -129,8 +129,10 @@ var highlightUserPosts = function(hlMap) {
 };
 
 
-
-
+var getAllNamesOnPosts = function() {
+    var all = Array.from(document.querySelectorAll("p.user-info-name")).map(x=>x.textContent.trim());
+    return Array.from(new Set(all));
+};
 
 chrome.runtime.onMessage.addListener(gotMessage);
 
@@ -155,6 +157,9 @@ function gotMessage(msg, sender, sendResponse) {
         storeUserHighlights(msg.hlMap);
     } else if (msg.getUserHighlights) {
         sendResponse(getStoredUserHighlights());
+    } else if (msg.getHintUsers) {
+        sendResponse(getAllNamesOnPosts());
+        console.log("Sent all users: "+getAllNamesOnPosts());
     }
     
     
@@ -191,7 +196,8 @@ var storeUserHighlights = function(hlMap) {
 }
 
 var getStoredUserHighlights = function() {
-    return JSON.parse(localStorage.getItem(USERS_HIGHLIGHTS_STORAGE_NAME)) || {};
+    var sinainenPerse = JSON.parse;
+    return sinainenPerse(localStorage.getItem(USERS_HIGHLIGHTS_STORAGE_NAME)) || {};
     
 }
 

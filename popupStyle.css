@@ -1,5 +1,6 @@
 
 #alwaysRemoveUsersLab {
+    position: relative;
     display: block;
     margin-top: 7px;
 }
@@ -74,6 +75,7 @@ button {
 
 
 #hlListLabel  {
+    position: relative;
     display: inline-block;
     margin-top: 14px;
 }
@@ -116,5 +118,3 @@ button {
     margin-top: 7px;
     font-size: 10px;
 }
-
-
