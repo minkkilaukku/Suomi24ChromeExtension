@@ -129,9 +129,19 @@ var highlightUserPosts = function(hlMap) {
 };
 
 
-var getAllNamesOnPosts = function() {
+/** Get a list of objects {username, postCount} */
+var getAllNamesOnPostsData = function() {
     var all = Array.from(document.querySelectorAll("p.user-info-name")).map(x=>x.textContent.trim());
-    return Array.from(new Set(all));
+    var usersOb = {}; //this counts the messages for each username
+    for (let u of all) {
+        if (!usersOb[u]) usersOb[u] = 0;
+        usersOb[u] += 1
+    }
+    var res = [];
+    for (let u in usersOb) {
+        res[res.length] = {username: u, postCount: usersOb[u]};
+    }
+    return res;
 };
 
 chrome.runtime.onMessage.addListener(gotMessage);
@@ -158,8 +168,7 @@ function gotMessage(msg, sender, sendResponse) {
     } else if (msg.getUserHighlights) {
         sendResponse(getStoredUserHighlights());
     } else if (msg.getHintUsers) {
-        sendResponse(getAllNamesOnPosts());
-        console.log("Sent all users: "+getAllNamesOnPosts());
+        sendResponse(getAllNamesOnPostsData());
     }
     
     

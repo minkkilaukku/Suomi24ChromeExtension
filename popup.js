@@ -12,25 +12,30 @@ var showTab = function(ind) {
 };
 
 var initTabs = function() {
-    
     let tabI = 0;
     for (tab of tabs) {
         tab.onclick = showTab.bind(tab, tabI);
         tabI++;
     }
-
 };
 
 initTabs();
 
 
-
-function sendMsg(msg) {
+/** Send a message to the active tab in the current window
+* @param msg: the message object
+* @param callBack: optional, a function that should get called with a response on the receiving end
+*/
+var sendMsg = function(msg, callBack) {
+    var gotTabs = function(tabs) {
+        for (let tab of tabs) chrome.tabs.sendMessage(tab.id, msg, callBack);
+    };
     chrome.tabs.query({active: true, currentWindow: true}, gotTabs);
-    function gotTabs(tabs) {
-        for (let tab of tabs) chrome.tabs.sendMessage(tab.id, msg);
-    }
-}
+};
+
+
+
+
 
 
 
@@ -79,15 +84,16 @@ var setAlwaysRemoveUsers = function(userNames) {
 };
 
 //fill the alwaysRemoveUsersContainer from querying the active tab
-chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-    chrome.tabs.sendMessage(tabs[0].id, {getAlwaysRemoveUsers: true}, function(response) {
-        if (response) {
-            setAlwaysRemoveUsers(response)
-        }
-    });
+sendMsg({getAlwaysRemoveUsers: true}, function(response) {
+    if (response) {
+        setAlwaysRemoveUsers(response);
+    }
 });
 
 // -----------------------------------------------------------------------------------------------------
+
+
+
 
 
 //----------------------- highlight tab -------------------------------------------------------------
@@ -157,58 +163,86 @@ var updateUserHighlights = function() {
 
 
 //querying the already existing highlights
-chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-    chrome.tabs.sendMessage(tabs[0].id, {getUserHighlights: true}, function(response) {
-        if (response) {
-            for (let uN of Object.getOwnPropertyNames(response)) {
-                addUserHl(uN, response[uN]);
-            }
+sendMsg({getUserHighlights: true}, function(response) {
+    if (response) {
+        for (let uN of Object.getOwnPropertyNames(response)) {
+            addUserHl(uN, response[uN]);
         }
-    });
+    }
 });
 
 //--------------------------------------------------------------------------------------------
 
 
+
+
+
+/** Not used, since autocompletion done with datalist, but if we would like to render
+ * the options differently (for example show number of messages of each user),
+ * autoComplete.js would give means for that //TODO
+ */
 var hideAutoComplete;
 var hlAutoComplete;
 
+var setAutoCompletes = function(usersResponse) {
+    
+    //***datalist-way: ***
+    let dList = document.createElement("datalist");
+    for (let u of usersResponse) {
+        let dEl = document.createElement("option");
+        dEl.value = u.username;
+        dEl.textContent = "("+u.postCount+")";
+        dList.appendChild(dEl);
+    }
 
-//---- get username hints --------------------------------------
-chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-    chrome.tabs.sendMessage(tabs[0].id, {getHintUsers: true}, function(response) {
-        console.log("got response "+response);
-        if (response) {
-            hideAutoComplete = new autoComplete({
-                selector: userNameInput,
-                minChars: 1,
-                source: function(term, suggest){
-                    term = term.toLowerCase();
-                    var choices = response;
-                    var matches = [];
-                    for (i=0; i<choices.length; i++)
-                        if (~choices[i].toLowerCase().indexOf(term)) matches.push(choices[i]);
-                    suggest(matches);
-                }
-            });
-            
-            hlAutoComplete = new autoComplete({
-                selector: hLNameInput,
-                minChars: 1,
-                source: function(term, suggest){
-                    term = term.toLowerCase();
-                    var choices = response;
-                    var matches = [];
-                    for (i=0; i<choices.length; i++)
-                        if (~choices[i].toLowerCase().indexOf(term)) matches.push(choices[i]);
-                    suggest(matches);
-                }
-            });
-            
+    dList.setAttribute("id", "userNamesDataList");
+    document.body.appendChild(dList);
+
+    userNameInput.setAttribute("list", "userNamesDataList");
+    hlNameInput.setAttribute("list", "userNamesDataList");
+    //*** --- ***
+    
+    
+    //--- autoComplete.js -way --- //TODO new usersResponse, get username as usersResponse[i].username
+    /*
+    hideAutoComplete = new autoComplete({
+        selector: userNameInput,
+        minChars: 1,
+        source: function(term, suggest){
+            term = term.toLowerCase();
+            var choices = userNames;
+            var matches = [];
+            for (i=0; i<choices.length; i++)
+                if (~choices[i].toLowerCase().indexOf(term)) matches.push(choices[i]);
+            suggest(matches);
         }
     });
-});
 
+    hlAutoComplete = new autoComplete({
+        selector: hLNameInput,
+        minChars: 1,
+        source: function(term, suggest){
+            term = term.toLowerCase();
+            var choices = userNames;
+            var matches = [];
+            for (i=0; i<choices.length; i++)
+                if (~choices[i].toLowerCase().indexOf(term)) matches.push(choices[i]);
+            suggest(matches);
+        }
+    });
+    */
+    //--- *** ---
+       
+};
+
+
+//---- get username hints --------------------------------------
+sendMsg({getHintUsers: true}, function(response) {
+    console.log("got response "+response);
+    if (response) {
+        setAutoCompletes(response);
+    }
+});
 
 
 
