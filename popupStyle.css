@@ -1,4 +1,9 @@
 
+body {
+    min-width: 250px;
+    min-height: 250px;
+}
+
 #alwaysRemoveUsersLab {
     position: relative;
     display: block;
@@ -41,22 +46,26 @@ button {
 
 
 #tabs {
+    position: relative;
     background: #999;
-    margin-bottom: 10px;
-    width: 100%;
     margin: 0;
     margin-bottom: 18px;
+    width: 100%;
     -webkit-user-select: none;
+    text-align: center;
 }
 
 #tabs span{
+    text-align: center;
     display: inline-block;
     background: #999;
     border: 2px solid black;
-    padding: 4px;
+    padding: 2px;
     font: 14px Helvetica;
-    width: 40%;
+    font-weight: 900;
+    width: 27%;
     cursor: pointer;
+    margin: 0;
 }
 
 #tabs span[active="true"]  {
@@ -117,4 +126,23 @@ button {
 #clearAllHlsButton {
     margin-top: 7px;
     font-size: 10px;
+}
+
+
+
+.findUserButtonsDiv {
+    text-align: center;
+}
+
+.findUserButtonsDiv button{
+    font: 15px Helvetica;
+    font-weight: 400;
+}
+
+#findUserPrevButton {
+    
+}
+
+#findUserNextButton {
+    
 }

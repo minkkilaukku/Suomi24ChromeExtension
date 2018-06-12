@@ -1,6 +1,7 @@
 
 
-var divs = [document.getElementById("hidePosts"), document.getElementById("highlightPosts")];
+var divs = [document.getElementById("findPosts"), document.getElementById("highlightPosts"), document.getElementById("hidePosts")];
+
 var tabs = Array.from(document.getElementById("tabs").children);
 
 var showTab = function(ind) {
@@ -17,6 +18,7 @@ var initTabs = function() {
         tab.onclick = showTab.bind(tab, tabI);
         tabI++;
     }
+    showTab(0);
 };
 
 initTabs();
@@ -40,6 +42,8 @@ var sendMsg = function(msg, callBack) {
 
 
 // ------ hide posts -----------------------------------------------------------------------------------
+{
+
 var userNameInput = document.getElementById("userNamesInput");
 var alwaysRemoveList = document.getElementById("alwaysRemoveUsersContainer");
 
@@ -90,13 +94,15 @@ sendMsg({getAlwaysRemoveUsers: true}, function(response) {
     }
 });
 
+}
 // -----------------------------------------------------------------------------------------------------
 
 
 
 
 
-//----------------------- highlight tab -------------------------------------------------------------
+//----------------------- highlight posts -------------------------------------------------------------
+{
 
 var hLNameInput = document.getElementById("hlNameInput");
 var hLColorInput = document.getElementById("hlColorInput");
@@ -171,10 +177,49 @@ sendMsg({getUserHighlights: true}, function(response) {
     }
 });
 
+}
 //--------------------------------------------------------------------------------------------
 
 
 
+
+//----------------------- find posts -------------------------------------------------------------
+{
+
+var findNameInput = document.getElementById("finduserNameInput");
+var findPrevButton = document.getElementById("findUserPrevButton");
+var findNextButton = document.getElementById("findUserNextButton");
+    
+/** number that tells how manyeth message want to find (not bounded, can also be negative)
+ *  need to wrap over total post count when used
+*/
+var postIndex = 0;
+    
+findPrevButton.onclick = function() {
+    var uN = findNameInput.value.trim();
+    if (uN.length) {
+        sendMsg({findUserPost: true, username: uN, postIndex: postIndex});
+        postIndex--;
+    }
+};
+    
+findNextButton.onclick = function() {
+    var uN = findNameInput.value.trim();
+    if (uN.length) {
+        sendMsg({findUserPost: true, username: uN, postIndex: postIndex});
+        postIndex++;
+    }
+};
+    
+findNameInput.oninput = function() {
+    postIndex = 0; //start anew for new username input
+}
+
+}
+//--------------------------------------------------------------------------------------------
+
+    
+    
 
 
 /** Not used, since autocompletion done with datalist, but if we would like to render
@@ -183,6 +228,7 @@ sendMsg({getUserHighlights: true}, function(response) {
  */
 var hideAutoComplete;
 var hlAutoComplete;
+//var findAutoComplete; //TODO maybe if this way?
 
 var setAutoCompletes = function(usersResponse) {
     
@@ -200,6 +246,7 @@ var setAutoCompletes = function(usersResponse) {
 
     userNameInput.setAttribute("list", "userNamesDataList");
     hlNameInput.setAttribute("list", "userNamesDataList");
+    findNameInput.setAttribute("list", "userNamesDataList");
     //*** --- ***
     
     

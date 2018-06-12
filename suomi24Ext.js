@@ -144,12 +144,40 @@ var getAllNamesOnPostsData = function() {
     return res;
 };
 
-chrome.runtime.onMessage.addListener(gotMessage);
 
-function gotMessage(msg, sender, sendResponse) {
+var cachedUserEls = [];
+var cachedUserName = null;
+
+var findUserPost = function(userName, postIndex) {
     
+    //TODO if (cachedUserName === userName) use Cached
+    
+    //console.log("Finding users "+userName+" "+postIndex+"th post...");
+    var userEls = Array.from(document.querySelectorAll("p.user-info-name"));
+    var userNames = userEls.map(x=>x.textContent.trim());
+    
+    for (let i=0; i<userNames.length; i++) {
+        if (userNames[i]!==userName) {
+            delete userNames[i];
+            delete userEls[i];
+        }
+    }
+    userEls = userEls.filter(x=>x);
+    userNames = userNames.filter(x=>x);
+    
+    var elsN = userEls.length;
+    if (elsN>0) {
+        var elInd = (postIndex%elsN+elsN)%elsN;
+        var topPos = userEls[elInd].getBoundingClientRect().top + window.scrollY;
+        window.scrollTo(0, topPos);
+    }
+    
+};
+
+
+
+var gotMessage = function(msg, sender, sendResponse) {
     //console.log(msg);
-    
     if (msg.removePosts == true) {
         removeUsersPosts(msg.userNames);
         if (msg.removeAlways == true) {
@@ -169,10 +197,14 @@ function gotMessage(msg, sender, sendResponse) {
         sendResponse(getStoredUserHighlights());
     } else if (msg.getHintUsers) {
         sendResponse(getAllNamesOnPostsData());
+    } else if (msg.findUserPost) {
+        findUserPost(msg.username, msg.postIndex);
     }
     
     
-}
+};
+
+chrome.runtime.onMessage.addListener(gotMessage);
 
 
 var addUsersToRemoveAlways = function(userNames) {
