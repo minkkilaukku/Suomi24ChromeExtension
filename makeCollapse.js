@@ -1,4 +1,4 @@
-
+const COLL_BUTT_SIZE = 23; //diameter of collapse/expand buttons in pixels
 
 var addCollapsing = function() {
     var indentMarkers = document.querySelectorAll(".indented");
@@ -23,8 +23,8 @@ var addCollapsing = function() {
     
     
     var setButtBg = function(butt, url) {
-        butt.style.background = "transparent url("+url+") no-repeat top left";
-        butt.style.backgroundSize = "20px 20px";
+        butt.style.background = "transparent url("+url+") no-repeat center"; //center seems to work
+        butt.style.backgroundSize = COLL_BUTT_SIZE+"px "+ COLL_BUTT_SIZE+"px";
     };
     
     var makeCollButt = function(i) {
@@ -37,12 +37,14 @@ var addCollapsing = function() {
             //commConts[i].style.display = isColl ? "none" : "block";
             commConts[i].classList.toggle("hiddenWithLankkiMiukku");
             collButts[i].setAttribute("collapsed", isColl);
-            let urlOfImg = chrome.extension.getURL(isColl ? "expand.png" : "collapse.png");
+            let urlOfImg = chrome.extension.getURL(isColl ? "img/expand.png" : "img/collapse.png");
             //console.log("got url "+urlOfImg);
             setButtBg(b, urlOfImg);
         };
-        let urlOfImg = chrome.extension.getURL("collapse.png");
+        let urlOfImg = chrome.extension.getURL("img/collapse.png");
         //console.log("got url "+urlOfImg);
+        b.style.width = COLL_BUTT_SIZE+"px";
+        b.style.height = COLL_BUTT_SIZE+"px";
         setButtBg(b, urlOfImg);
         return b;
     };

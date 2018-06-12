@@ -16,7 +16,7 @@
     ,
     */
     "browser_action": {
-        "default_icon": "suomi24Ext.png",
+        "default_icon": "img/suomi24Ext.png",
         "default_popup": "popup.html",
         "default_title": "Suomi24"
     },
@@ -27,7 +27,7 @@
         "<all_urls>"
     ],
     
-    "web_accessible_resources": ["collapse.png", "expand.png"]
+    "web_accessible_resources": ["img/*.png"]
     
 }
 
