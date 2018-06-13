@@ -205,16 +205,16 @@ findUserSortSelect.getSelection = function() {
 var postIndex = null;
     
 var findButtonClick = function(postIndIncr) {
-    //initialize postIndex to the opposite direction
-    //so it will be set to correct on increment
-    if (postIndex === null) postIndex = -postIndIncr;
+    //initialize postIndex to the opposite direction if want to go frwrd and to 0 if want to go bkwrd
+    //so it will be set to correct when incremented
+    if (postIndex === null) postIndex = postIndIncr>0 ? -postIndIncr : 0;
     postIndex += postIndIncr;
     var uN = findNameInput.value.trim();
-    if (uN.length) {
-        let selectedSortEl = findUserSortSelect.getSelection();
-        let selectedSort = selectedSortEl ? selectedSortEl.value : null;
-        sendMsg({findUserPost: true, username: uN, postIndex: postIndex, sortBy: selectedSort});
-    }
+    
+    let selectedSortEl = findUserSortSelect.getSelection();
+    let selectedSort = selectedSortEl ? selectedSortEl.value : null;
+    sendMsg({findUserPost: true, username: uN, postIndex: postIndex, sortBy: selectedSort});
+    
 };
     
 findPrevButton.onclick = function() {

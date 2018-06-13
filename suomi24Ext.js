@@ -156,12 +156,14 @@ var getUserPostElems = function(userName, sortBy) {
         var userEls = Array.from(document.querySelectorAll("p.user-info-name"));
         var userNames = userEls.map(x=>x.textContent.trim());
 
-        for (let i=0; i<userNames.length; i++) {
-            if (userNames[i]!==userName) {
-                delete userEls[i];
+        if (userName.length>0) { //empty userName means get all
+            for (let i=0; i<userNames.length; i++) {
+                if (userNames[i]!==userName) {
+                    delete userEls[i];
+                }
             }
+            userEls = userEls.filter(x=>x);
         }
-        userEls = userEls.filter(x=>x);
 
         if (sortBy==="time") {
             let timeStampGetter = el=>{
@@ -190,7 +192,10 @@ var getUserPostElems = function(userName, sortBy) {
     }
 };
 
-
+/**
+* scroll the page to the @postIndex'th (in the ordering given by @sortBy) post of user @userName.
+* (empty userName means consider all posts)
+*/
 var scrollToUserPost = function(userName, postIndex, sortBy) {
     var userEls = getUserPostElems(userName, sortBy);
     
