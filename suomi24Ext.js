@@ -147,23 +147,52 @@ var getAllNamesOnPostsData = function() {
 
 var cachedUserEls = [];
 var cachedUserName = null;
+var cachedSortBy = null;
 
-var findUserPost = function(userName, postIndex) {
-    
-    //TODO if (cachedUserName === userName) use Cached
-    
-    //console.log("Finding users "+userName+" "+postIndex+"th post...");
-    var userEls = Array.from(document.querySelectorAll("p.user-info-name"));
-    var userNames = userEls.map(x=>x.textContent.trim());
-    
-    for (let i=0; i<userNames.length; i++) {
-        if (userNames[i]!==userName) {
-            delete userNames[i];
-            delete userEls[i];
+var getUserPostElems = function(userName, sortBy) {
+    if (userName === cachedUserName && sortBy === cachedSortBy) {
+        return cachedUserEls;
+    } else {
+        var userEls = Array.from(document.querySelectorAll("p.user-info-name"));
+        var userNames = userEls.map(x=>x.textContent.trim());
+
+        for (let i=0; i<userNames.length; i++) {
+            if (userNames[i]!==userName) {
+                delete userEls[i];
+            }
         }
+        userEls = userEls.filter(x=>x);
+
+        if (sortBy==="time") {
+            let timeStampGetter = el=>{
+                var tSEl = el.parentElement.getElementsByClassName("user-info-timestamp")[0];
+                if (tSEl) return tSEl.textContent.trim();
+                return "1.1.1900 00:00";
+            };
+            let dateMaker = ts => {
+                var [da, ti] = ts.split(" ");
+                var [day, month, year] = da.split(".");
+                var [hour, minute] = ti.split(":");
+                //month is zero-based (doesn't affect ordering but make it still correct)
+                return new Date(year, month-1, day, hour, minute, 0); //-1 converts to number
+
+            };
+            //put a date object to each element as property, so it's easy to sort them
+            userEls.forEach( el=>el.datePosted = dateMaker(timeStampGetter(el)) );
+            userEls.sort((a,b)=>a.datePosted-b.datePosted);
+        }
+        
+        cachedUserEls = userEls;
+        cachedUserName = userName;
+        cachedSortBy = sortBy;
+        
+        return userEls;
     }
-    userEls = userEls.filter(x=>x);
-    userNames = userNames.filter(x=>x);
+};
+
+
+var scrollToUserPost = function(userName, postIndex, sortBy) {
+    var userEls = getUserPostElems(userName, sortBy);
     
     var elsN = userEls.length;
     if (elsN>0) {
@@ -198,7 +227,7 @@ var gotMessage = function(msg, sender, sendResponse) {
     } else if (msg.getHintUsers) {
         sendResponse(getAllNamesOnPostsData());
     } else if (msg.findUserPost) {
-        findUserPost(msg.username, msg.postIndex);
+        scrollToUserPost(msg.username, msg.postIndex, msg.sortBy);
     }
     
     
