@@ -210,6 +210,15 @@ var scrollToUserPost = function(userName, postIndex, sortBy) {
 
 
 
+var sendGotUsersToRemoveAlwaysMsg = function(userNames) {
+    chrome.runtime.sendMessage({
+        gotUsersToRemoveAlways: true, 
+        userNames: userNames
+    });
+};
+
+
+
 var gotMessage = function(msg, sender, sendResponse) {
     //console.log(msg);
     if (msg.removePosts == true) {
@@ -218,8 +227,8 @@ var gotMessage = function(msg, sender, sendResponse) {
             addUsersToRemoveAlways(msg.userNames)
         }
     } else if (msg.getAlwaysRemoveUsers) {
-        sendResponse(getUsersToRemoveAlways());
-        //console.log("got queried about the always-to-remove users: "+getUsersToRemoveAlways());
+        //port gets nulled out, so can't use sendResponse, must send a new message
+        getUsersToRemoveAlways(function(res) {sendGotUsersToRemoveAlwaysMsg(res);});
     } else if (msg.removeFromAlwaysToRemove) {
         removeUsersToRemoveAlways(msg.userNames);
     } else if (msg.clearAlwaysRemoves) {
@@ -228,6 +237,7 @@ var gotMessage = function(msg, sender, sendResponse) {
         highlightUserPosts(msg.hlMap);
         storeUserHighlights(msg.hlMap);
     } else if (msg.getUserHighlights) {
+        //TODO must send a new message when change hl getting to chrome.storage, too
         sendResponse(getStoredUserHighlights());
     } else if (msg.getHintUsers) {
         sendResponse(getAllNamesOnPostsData());
@@ -242,55 +252,60 @@ chrome.runtime.onMessage.addListener(gotMessage);
 
 
 var addUsersToRemoveAlways = function(userNames) {
-    var prev = getUsersToRemoveAlways();
-    var toStore = Array.from(new Set( prev.concat(userNames) ));
-    setUsersToRemoveAlways(toStore);
+    getUsersToRemoveAlways(function(prev) {
+        var toStore = Array.from(new Set( prev.concat(userNames) ));
+        setUsersToRemoveAlways(toStore);
+    });
 };
 
 var removeUsersToRemoveAlways = function(userNames) {
-    var prev = new Set(getUsersToRemoveAlways());
-    for (let uN of userNames) prev.delete(uN);
-    var toStore = Array.from(prev);
-    setUsersToRemoveAlways(toStore);
+    getUsersToRemoveAlways(function(res) {
+        var prevSet = new Set(res);
+        for (let uN of userNames) prevSet.delete(uN);
+        var toStore = Array.from(prevSet);
+        setUsersToRemoveAlways(toStore);
+    });
 };
+
+
+//---- storing ----------------------------------------------------------------------
 
 var setUsersToRemoveAlways = function(userNames) {
-    localStorage.setItem(USERS_TO_REMOVE_STORAGE_NAME, JSON.stringify(userNames));
+    var setOb = {};
+    setOb[USERS_TO_REMOVE_STORAGE_NAME] = userNames;
+    chrome.storage.sync.set(setOb);
+    //localStorage.setItem(USERS_TO_REMOVE_STORAGE_NAME, JSON.stringify(userNames));
 };
 
-
-var getUsersToRemoveAlways = function() {
-    return JSON.parse(localStorage.getItem(USERS_TO_REMOVE_STORAGE_NAME)) || [];
+/** Get the stored array of usernames to remove always and pass them to the callBack once received.
+*  @param callBack: a function that should be called with the gotten array as parameter.
+*/
+var getUsersToRemoveAlways = function(callBack) {
+    
+    chrome.storage.sync.get([USERS_TO_REMOVE_STORAGE_NAME], function(res) {
+        var users = res[USERS_TO_REMOVE_STORAGE_NAME] || [];
+        callBack(users);
+    });
+    //return JSON.parse(localStorage.getItem(USERS_TO_REMOVE_STORAGE_NAME)) || [];
     
 };
 
 
 var storeUserHighlights = function(hlMap) {
+    //TODO put in chrome.storage.sync
     localStorage.setItem(USERS_HIGHLIGHTS_STORAGE_NAME, JSON.stringify(hlMap));
     
 }
 
 var getStoredUserHighlights = function() {
+    //TODO put in chrome.storage.sync
     var sinainenPerse = JSON.parse;
     return sinainenPerse(localStorage.getItem(USERS_HIGHLIGHTS_STORAGE_NAME)) || {};
     
 }
+//---------------------------------------------------------------------------------
 
 
-
-removeUsersPosts( getUsersToRemoveAlways() );
+getUsersToRemoveAlways( res => removeUsersPosts(res) );
 highlightUserPosts( getStoredUserHighlights() );
-//console.log("removing users "+ getUsersToRemoveAlways() +" always");
-
-addCollapsing();
-
-
-
-//console.log("Chrome.extension: ", chrome.extension);
-
-
-
-
-
-
 

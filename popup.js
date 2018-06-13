@@ -88,11 +88,14 @@ var setAlwaysRemoveUsers = function(userNames) {
 };
 
 //fill the alwaysRemoveUsersContainer from querying the active tab
-sendMsg({getAlwaysRemoveUsers: true}, function(response) {
-    if (response) {
-        setAlwaysRemoveUsers(response);
-    }
-});
+//can't use callBack, since the port gets nulled out while getting the values from chrome.storage
+sendMsg({getAlwaysRemoveUsers: true});
+    //function(response) {
+    //debugger;
+    //if (response) {
+    //    setAlwaysRemoveUsers(response);
+    //}
+//});
 
 }
 // -----------------------------------------------------------------------------------------------------
@@ -103,7 +106,7 @@ sendMsg({getAlwaysRemoveUsers: true}, function(response) {
 
 //----------------------- highlight posts -------------------------------------------------------------
 {
-
+    
 var hLNameInput = document.getElementById("hlNameInput");
 var hLColorInput = document.getElementById("hlColorInput");
 var hLSetButton = document.getElementById("hlSetButton");
@@ -299,13 +302,31 @@ var setAutoCompletes = function(usersResponse) {
 
 //---- get username hints --------------------------------------
 sendMsg({getHintUsers: true}, function(response) {
-    //console.log("got response "+response);
+    //console.log("got response ",response);
     if (response) {
-        setAutoCompletes(response);
+        let keyForStorage = "lankki_miukku_user_name_sort";
+        chrome.storage.sync.get([keyForStorage], function(storeRes) {
+            let valFromStore = storeRes[keyForStorage];
+            if (valFromStore==="alphabetical") {
+                response.sort((a,b)=>a.username.toLowerCase().localeCompare(b.username.toLowerCase()));
+                //console.log("got alphabetical and sorted to", response);
+            }
+            setAutoCompletes(response);
+        });
     }
 });
 
 
+
+//listen for messages
+chrome.runtime.onMessage.addListener(
+    function(msg, sender, sendResponse) {
+        if (msg.gotUsersToRemoveAlways) {
+            //console.log("got message about users to remove always: ",msg.userNames);
+            setAlwaysRemoveUsers(msg.userNames);
+        }
+    }
+);
 
 
 

@@ -1,0 +1,46 @@
+body {
+    background: #555;
+    text-align: center;
+    font: 18px Helvetica;
+}
+
+#settingsContainer {
+    display: inline-block;
+    margin: 20px;
+    background: #ddd;
+    padding: 50px 70px 50px 70px;
+    
+}
+
+img.logo {
+    width: 100px;
+    height: auto;
+}
+
+select {
+    font-size: 18px;
+}
+
+label {
+    display: inline-block;
+    margin-top: 20px;
+}
+
+input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+}
+
+#saveDiv {
+    margin-top: 30px;
+}
+
+#saveButton {
+    display: inline-block;
+    font-size: 24px;
+}
+
+#saveStatus {
+    margin-top: 5px;
+    color: green;
+}

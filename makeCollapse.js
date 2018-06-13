@@ -52,21 +52,17 @@ var addCollapsing = function() {
     var collButts = Array.from(colls).map((_,i)=>makeCollButt(i));
     
     for (let i=0; i<collButts.length; i++) {
-        //colls[i].style.display = "none";
         colls[i].after(collButts[i]);
     };
     
-    
-    /*
-    var updateCollButtsPositions = function() {
-        for (let i=0; i<collButts.length; i++) {
-            let cB = collButts[i];
-            let bdd = colls[i].getBoundingClientRect();
-            cB.style.left = bdd.left;
-            cB.style.top = bdd.top;
-        }
-    };
-    */
-    
-    
 };
+
+
+var keyForStorage = "lankki_miukku_romahdutus_buttonit";
+chrome.storage.sync.get([keyForStorage], function(result) {
+    let res = result[keyForStorage];
+    if (res || res===undefined) addCollapsing();
+});
+
+
+

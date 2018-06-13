@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <title>Suomi24 Chrome Extension Asetukset</title>
+    
+    <link rel="stylesheet" type="text/css" href="optionsStyle.css">
+</head>
+    
+<body>
+    
+<div id="settingsContainer">
+    
+    <image src="img/suomi24Ext.png" alt="Suomi24 logo" class="logo"></image>
+    <h1>Suomi24 Chrome Laajennus</h1>
+    <h2>Asetukset</h2>
+    
+    Käyttäjänimien järjestys valikossa
+    <select id="userNameOrdering">
+     <option value="alphabetical">Aakkosjärjestys</option>
+     <option value="default">Paikka ketjussa</option>
+    </select>
+
+        <br>
+
+    <label>
+      Lisää romahduta/laajenna napit
+      <input id="haveCollapseCheckbox" type="checkbox" checked>
+    </label>
+
+    <div id="saveDiv">
+    <button id="saveButton">Tallenna</button>
+    <div id="saveStatus"></div>
+    </div>
+        
+</div>
+
+<script src="options.js"></script>
+</body>
+</html>
