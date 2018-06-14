@@ -3,9 +3,11 @@ const STORAGE_NAME_HAVE_COLLAPSE = "lankki_miukku_romahdutus_buttonit";
 const STORAGE_NAME_KEY_BOARD_SEARCH = "lankki_miukku_nappaimisto_etsiminen";
 
 
+var dataChangedAndNotSaved = false;
 
 document.getElementById("searchWithKeyboardCheckbox").oninput = function() {
     document.getElementById("keysForFindDiv").style.display = this.checked ? "block" : "none";
+    dataChangedAndNotSaved = true;
 };
 
 //can use this for both buttons
@@ -17,6 +19,7 @@ var keySettingFunc = function() {
         self.removeEventListener("keyup", keyListener);
         self.blur();
         document.getElementById("keySetText").textContent = "";
+        dataChangedAndNotSaved = true;
     };
     this.keyListenerHandle = keyListener; //store handle for removing on blur
     this.addEventListener("keyup", keyListener);
@@ -36,6 +39,13 @@ document.getElementById("keyForPrevButton").onblur = onBlurFunc;
 document.getElementById("keyForNextButton").onblur = onBlurFunc;
 
 
+
+document.getElementById("userNameOrdering").oninput = function() {
+    dataChangedAndNotSaved = true;
+};
+
+
+
 // Saves options to chrome.storage
 function saveOptions() {
     var userNameSortBy = document.getElementById('userNameOrdering').value;
@@ -51,11 +61,12 @@ function saveOptions() {
     chrome.storage.sync.set(setOb, function() {
     // Update status to let user know options were saved.
         var status = document.getElementById('saveStatus');
-        status.textContent = 'Asetukset tallennettu.';
+        status.style.visibility = 'visible' // = 'Asetukset tallennettu.';
         setTimeout(function() {
-            status.textContent = '';
+            status.style.visibility = 'hidden';
         }, 750);
     });
+    dataChangedAndNotSaved = false;
 }
 
 document.getElementById('saveButton').addEventListener('click', saveOptions);
@@ -87,3 +98,13 @@ function restoreOptions() {
 }
 
 document.addEventListener('DOMContentLoaded', restoreOptions);
+
+
+
+window.onbeforeunload = function() {
+    if (dataChangedAndNotSaved) {
+        return "Jos poistut, muutoksia ei tallenneta.";
+    } else {
+        return;
+    }
+};
