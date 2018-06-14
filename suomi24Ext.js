@@ -192,18 +192,41 @@ var getUserPostElems = function(userName, sortBy) {
     }
 };
 
+/** Get the container parent of a user-name element
+* (this way also the removed messages (where user-info is hidden) will be scrolled to)
+*/
+var getContainerOfUserEl = function(userEl) {
+    //to avoid infinite loop
+    //if for some reason the userEl isn't inside a answer or comment container
+    //it should always be 2 levels up, but find like this to be sure
+    var maxLevelsUp = 4;
+    var levelUpCounter = 0;
+    var res = userEl;
+    while (res && res.classList
+           && !res.classList.contains("answer-container")
+           && !res.classList.contains("comment-container")
+           && levelUpCounter<maxLevelsUp) {
+        res = res.parentElement;
+        levelUpCounter++;
+    }
+    return res;
+};
+
 /**
-* scroll the page to the @postIndex'th (in the ordering given by @sortBy) post of user @userName.
+* scroll the page to the @postIndex'th (in the ordering given by @sortBy)
+* post of user @userName (the container of the post is used to give the scroll position).
 * (empty userName means consider all posts)
 */
 var scrollToUserPost = function(userName, postIndex, sortBy) {
     var userEls = getUserPostElems(userName, sortBy);
-    
     var elsN = userEls.length;
     if (elsN>0) {
         var elInd = (postIndex%elsN+elsN)%elsN;
-        var topPos = userEls[elInd].getBoundingClientRect().top + window.scrollY;
-        window.scrollTo(0, topPos);
+        var container = getContainerOfUserEl(userEls[elInd]);
+        if (container) {
+            var topPos = container.getBoundingClientRect().top + window.scrollY;
+            window.scrollTo(0, topPos);
+        }
     }
     
 };
@@ -344,8 +367,8 @@ var setKeyboardFindMsgListener = function(ob) {
         };
         
         var onKeyDownFunc = function(postIndIncr, event) {
-            scrollToUserPost("", postInd, "time");
             postInd += postIndIncr;
+            scrollToUserPost("", postInd, "time");
             event.preventDefault();
         };
         var keyListener = function(event) {
