@@ -217,7 +217,12 @@ var sendGotUsersToRemoveAlwaysMsg = function(userNames) {
     });
 };
 
-
+var sendGotUserHLsMsg = function(hlMap) {
+    chrome.runtime.sendMessage({
+        gotUserHLs: true, 
+        hlMap: hlMap
+    });
+};
 
 var gotMessage = function(msg, sender, sendResponse) {
     //console.log(msg);
@@ -238,7 +243,7 @@ var gotMessage = function(msg, sender, sendResponse) {
         storeUserHighlights(msg.hlMap);
     } else if (msg.getUserHighlights) {
         //TODO must send a new message when change hl getting to chrome.storage, too
-        sendResponse(getStoredUserHighlights());
+        getStoredUserHighlights(res=>sendGotUserHLsMsg(res));
     } else if (msg.getHintUsers) {
         sendResponse(getAllNamesOnPostsData());
     } else if (msg.findUserPost) {
@@ -292,20 +297,77 @@ var getUsersToRemoveAlways = function(callBack) {
 
 
 var storeUserHighlights = function(hlMap) {
-    //TODO put in chrome.storage.sync
-    localStorage.setItem(USERS_HIGHLIGHTS_STORAGE_NAME, JSON.stringify(hlMap));
+    var setOb = {};
+    setOb[USERS_HIGHLIGHTS_STORAGE_NAME] = hlMap;
+    chrome.storage.sync.set(setOb);
+    
+    //localStorage.setItem(USERS_HIGHLIGHTS_STORAGE_NAME, JSON.stringify(hlMap));
     
 }
 
-var getStoredUserHighlights = function() {
-    //TODO put in chrome.storage.sync
-    var sinainenPerse = JSON.parse;
-    return sinainenPerse(localStorage.getItem(USERS_HIGHLIGHTS_STORAGE_NAME)) || {};
+/** Get the stored map of {username: hlColor} and pass them to the callBack once received.
+*  @param callBack: a function that should be called with the result as parameter.
+*/
+var getStoredUserHighlights = function(callBack) {
+    chrome.storage.sync.get([USERS_HIGHLIGHTS_STORAGE_NAME], function(res) {
+        var hlMap = res[USERS_HIGHLIGHTS_STORAGE_NAME] || [];
+        callBack(hlMap);
+    });
     
-}
+    //return JSON.parse(localStorage.getItem(USERS_HIGHLIGHTS_STORAGE_NAME)) || {};
+    
+};
+
+
+/** Get the stored object for info about keyboard searching:
+ * { useKeyboard:boolean, prevKeyCode:{code, ctrl, alt}, nextKeyCode:{code, ctrl, alt} }
+ */
+var getStoredKeyboardFindingMsg = function(callBack) {
+    var stKey = "lankki_miukku_nappaimisto_etsiminen";
+    chrome.storage.sync.get([stKey], function(res) {
+            callBack(res[stKey]);
+    });
+
+};
 //---------------------------------------------------------------------------------
 
 
-getUsersToRemoveAlways( res => removeUsersPosts(res) );
-highlightUserPosts( getStoredUserHighlights() );
+var setKeyboardFindMsgListener = function(ob) {
+    if (ob.useKeyboard) {
+        var postInd = 0; //assume want to go to the most recent (with prev button) first
+        
+        var checkKeyCodeFunc = function(keyCode, event) {
+            return event.keyCode === keyCode.code
+                && event.altKey === keyCode.alt
+                && event.ctrlKey === keyCode.ctrl
+        };
+        
+        var onKeyDownFunc = function(postIndIncr, event) {
+            scrollToUserPost("", postInd, "time");
+            postInd += postIndIncr;
+            event.preventDefault();
+        };
+        var keyListener = function(event) {
+            if (checkKeyCodeFunc(ob.prevKeyCode, event)) {
+                onKeyDownFunc(-1, event);
+            } else if (checkKeyCodeFunc(ob.nextKeyCode, event)) {
+                onKeyDownFunc(1, event);
+            }
+        };
+        
+        document.body.addEventListener("keydown", keyListener);
+    }
+};
 
+
+
+
+
+getUsersToRemoveAlways( res => removeUsersPosts(res) );
+getStoredUserHighlights( res => highlightUserPosts(res) );
+
+// set keyboard control of finding most recent posts
+getStoredKeyboardFindingMsg( setKeyboardFindMsgListener );
+
+
+//TODO swear word filter

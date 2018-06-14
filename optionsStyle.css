@@ -31,6 +31,15 @@ input[type="checkbox"] {
     height: 18px;
 }
 
+#keysForFindDiv button:focus {
+    background: orange;
+}
+
+#keySetText {
+    font-size: 14px;
+}
+
+
 #saveDiv {
     margin-top: 30px;
 }

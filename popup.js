@@ -119,6 +119,10 @@ hLSetButton.onclick = function() {
         updateUserHighlights();
     }
 };
+    
+hlColorInput.oninput = function() {
+    hlSetButton.focus();
+};
 
 
 document.getElementById("clearAllHlsButton").onclick = function() {
@@ -168,17 +172,32 @@ var getHlMap = function() {
 var updateUserHighlights = function() {
     sendMsg({highlightUsers: true, hlMap: getHlMap()});
 };
+    
+
+var setUserHlsTo = function(hlMap) {
+    hlList.innerHTML = "";
+    for (let uN in hlMap) {
+        addUserHl(uN, hlMap[uN]);
+    }
+}
 
 
 
 //querying the already existing highlights
-sendMsg({getUserHighlights: true}, function(response) {
-    if (response) {
-        for (let uN of Object.getOwnPropertyNames(response)) {
-            addUserHl(uN, response[uN]);
-        }
+sendMsg({getUserHighlights: true});
+    
+    {
+    //can't use callback (port gets nulled), handled by receivin a new message
+    //this is listened for at chrome.runtime.onMessage
+    
+    //function(response) {
+    //if (response) {
+    //    for (let uN of Object.getOwnPropertyNames(response)) {
+    //        addUserHl(uN, response[uN]);
+    //    }
+    //}
+//});
     }
-});
 
 }
 //--------------------------------------------------------------------------------------------
@@ -324,6 +343,8 @@ chrome.runtime.onMessage.addListener(
         if (msg.gotUsersToRemoveAlways) {
             //console.log("got message about users to remove always: ",msg.userNames);
             setAlwaysRemoveUsers(msg.userNames);
+        } else if (msg.gotUserHLs) {
+            setUserHlsTo(msg.hlMap);
         }
     }
 );
