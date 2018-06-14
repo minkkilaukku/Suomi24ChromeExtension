@@ -38,9 +38,14 @@ var removeUsersPosts = function(userNames) {
                     sib.style.display = "none";
                 }
                 
-                elem.after(makeRemovedP(userName, type));
+                //elem.after(makeRemovedP(userName, type)); //put the removedP as a child
                 //elem.parentElement.removeChild(elem);
-                elem.style.display = "none";
+                //elem.style.display = "none";
+                //hide all children, but leave the container and put the removedP in it
+                for (let child of elem.children) {
+                    child.style.display = "none";
+                }
+                elem.appendChild(makeRemovedP(userName, type));
             }
         }
     };
@@ -194,10 +199,12 @@ var getUserPostElems = function(userName, sortBy) {
 
 /** Get the container parent of a user-name element
 * (this way also the removed messages (where user-info is hidden) will be scrolled to)
+    //TODO the ones removed with the extension still don't get scrolled to,
+    //maybe leave the container?
 */
 var getContainerOfUserEl = function(userEl) {
     //to avoid infinite loop
-    //if for some reason the userEl isn't inside a answer or comment container
+    //if for some reason the userEl isn't inside an answer or comment container
     //it should always be 2 levels up, but find like this to be sure
     var maxLevelsUp = 4;
     var levelUpCounter = 0;
