@@ -35,6 +35,16 @@ input[type="checkbox"] {
     background: orange;
 }
 
+#keysForFindDiv span {
+    display: inline-block;
+    background: "#ccc";
+    min-width: 50px;
+    font-size: 14px;
+    margin-left: 2px;
+    margin-right: 7px;
+    text-align: left;
+}
+
 #keySetText {
     font-size: 14px;
 }

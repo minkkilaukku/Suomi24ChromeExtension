@@ -340,6 +340,7 @@ var setKeyboardFindMsgListener = function(ob) {
             return event.keyCode === keyCode.code
                 && event.altKey === keyCode.alt
                 && event.ctrlKey === keyCode.ctrl
+                && event.shiftKey === keyCode.shift;
         };
         
         var onKeyDownFunc = function(postIndIncr, event) {
