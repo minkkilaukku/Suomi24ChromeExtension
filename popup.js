@@ -44,16 +44,20 @@ var sendMsg = function(msg, callBack) {
 // ------ hide posts -----------------------------------------------------------------------------------
 {
 
-var userNameInput = document.getElementById("userNamesInput");
+//var userNameInput = document.getElementById("userNamesInput");
+var hideUserNameInputDiv = document.getElementById("hideUsersInputDiv");
 var alwaysRemoveList = document.getElementById("alwaysRemoveUsersContainer");
 
 document.getElementById("removeUsersPostsButton").onclick = function () {
-    var users = userNameInput.value.split(",").map(w=>w.trim()).filter(x=>x.length);
+    //TODO
+    var users = getHideCheckedUserNames();
+    //var users = userNameInput.value.split(",").map(w=>w.trim()).filter(x=>x.length);
     sendMsg({removePosts: true, userNames: users});
 };
 
 document.getElementById("alwaysRemoveUsersPostsButton").onclick =  function() {
-    var users = userNameInput.value.split(",").map(w=>w.trim()).filter(x=>x.length);
+    var users = getHideCheckedUserNames();
+    //var users = userNameInput.value.split(",").map(w=>w.trim()).filter(x=>x.length);
     sendMsg({removePosts: true, userNames: users, removeAlways: true});
     var prevNameSet = new Set (Array.from(alwaysRemoveList.children).map(x=>x.textContent));
     for (let uN of users) {
@@ -96,6 +100,28 @@ sendMsg({getAlwaysRemoveUsers: true});
     //    setAlwaysRemoveUsers(response);
     //}
 //});
+
+
+    
+var fillHideUserDiv = function(userNames) {
+    for (let uOb of userNames) {
+        let el = document.createElement("div");
+        hideUserNameInputDiv.appendChild(el);
+        let elLab = document.createElement("label");
+        el.appendChild(elLab);
+        elLab.textContent = uOb.username;
+        let elCheck = document.createElement("input");
+        elCheck.type = "checkbox";
+        elLab.appendChild(elCheck);
+    }
+};
+    
+var getHideCheckedUserNames = function() {
+    return Array.from(hideUserNameInputDiv.children).filter(el=>{
+        let checkBox = el.getElementsByTagName("input")[0];
+        return checkBox && checkBox.checked;
+    }).map(el => el.textContent.trim());
+};
 
 }
 // -----------------------------------------------------------------------------------------------------
@@ -282,7 +308,8 @@ var setAutoCompletes = function(usersResponse) {
     dList.setAttribute("id", "userNamesDataList");
     document.body.appendChild(dList);
 
-    userNameInput.setAttribute("list", "userNamesDataList");
+    //userNameInput.setAttribute("list", "userNamesDataList");
+    fillHideUserDiv(usersResponse);
     hlNameInput.setAttribute("list", "userNamesDataList");
     findNameInput.setAttribute("list", "userNamesDataList");
     //*** --- ***
