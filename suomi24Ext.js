@@ -346,6 +346,7 @@ var setKeyboardFindMsgListener = function(ob) {
         var postInd = 0; //assume want to go to the most recent (with prev button) first
         
         var checkKeyCodeFunc = function(keyCode, event) {
+            if (!keyCode) return false;
             return event.keyCode === keyCode.code
                 && event.altKey === keyCode.alt
                 && event.ctrlKey === keyCode.ctrl
