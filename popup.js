@@ -109,10 +109,10 @@ var fillHideUserDiv = function(userNames) {
         hideUserNameInputDiv.appendChild(el);
         let elLab = document.createElement("label");
         el.appendChild(elLab);
-        elLab.textContent = uOb.username;
         let elCheck = document.createElement("input");
         elCheck.type = "checkbox";
         elLab.appendChild(elCheck);
+        elLab.appendChild(document.createTextNode(uOb.username));
     }
 };
     
