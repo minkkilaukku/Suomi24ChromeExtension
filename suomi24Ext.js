@@ -55,29 +55,10 @@ var removeUsersPosts = function(userNames) {
     
     for (let ans of answers) {
         handlePostElement(ans, "viesti");
-        /*
-        let ansUserNameCont = ans.getElementsByClassName("user-info-name")[0];
-        
-        if ( ansUserNameCont ) {
-            let ansUserName = ansUserNameCont.textContent.trim();
-            if ( usersToRemove.has(ansUserName) ) {
-                ans.after(makeRemovedP(ansUserName));
-                ans.parentElement.removeChild(ans);
-            }
-        }
-        */
     }
     
     for (let comm of comments) {
         handlePostElement(comm, "kommentti");
-        /*
-        let commUserNameCont = comm.getElementsByClassName("user-info-name")[0];
-        if ( commUserNameCont &&  usersToRemove.has(commUserNameCont.textContent.trim())) {
-            let commUserName = commUserNameCont.textContent.trim();
-            comm.after(makeRemovedP(commUserName, "kommentti"));
-            comm.parentElement.removeChild(comm);
-        }
-        */
     }
     
 };
@@ -199,8 +180,6 @@ var getUserPostElems = function(userName, sortBy) {
 
 /** Get the container parent of a user-name element
 * (this way also the removed messages (where user-info is hidden) will be scrolled to)
-    //TODO the ones removed with the extension still don't get scrolled to,
-    //maybe leave the container?
 */
 var getContainerOfUserEl = function(userEl) {
     //to avoid infinite loop

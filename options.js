@@ -194,19 +194,19 @@ var keySettingFunc = function() {
                              shift: evt.shiftKey};
         self.removeEventListener("keyup", keyListener);
         self.blur();
-        document.getElementById("keySetText").textContent = "";
         updatekeyButtonKeySpans();
         dataChangedAndNotSaved = true;
     };
     this.keyListenerHandle = keyListener; //store handle for removing on blur
     this.addEventListener("keyup", keyListener);
     this.onkeydown = ev => ev.preventDefault();
-    document.getElementById("keySetText").textContent = "Aseta näppäin painamalla sitä...";
+    document.getElementById("keySetText").style.visibility = "visible";
+        //"Aseta näppäin painamalla sitä...";
 };
 
 var onBlurFunc = function(evt) {
     this.removeEventListener("keyup", this.keyListenerHandle);
-    document.getElementById("keySetText").textContent = "";
+    document.getElementById("keySetText").style.visibility = "hidden";
 };
 
 document.getElementById("keyForPrevButton").onclick = keySettingFunc;
@@ -223,15 +223,19 @@ document.getElementById("keyForNextButton").onblur = onBlurFunc;
 var updatekeyButtonKeySpans = function(prevKeyCodeOb, nextKeyCodeOb) {
     var updateSpan = function(span, keyCodeOb) {
         span.textContent = "";
-        if (keyCodeOb.shift) span.textContent += "shift + ";
-        if (keyCodeOb.ctrl) span.textContent += "ctrl + ";
-        if (keyCodeOb.alt) span.textContent += "alt + ";
-        span.textContent += KEY_CODES[keyCodeOb.code]||"[unknown]";
+            if (keyCodeOb) {
+            if (keyCodeOb.shift) span.textContent += "shift + ";
+            if (keyCodeOb.ctrl) span.textContent += "ctrl + ";
+            if (keyCodeOb.alt) span.textContent += "alt + ";
+            span.textContent += KEY_CODES[keyCodeOb.code]||"[unknown]";
+        } else {
+            span.textContent = "[ei asetettu]";
+        }
     };
     
     
-    prevKeyCodeOb = prevKeyCodeOb||document.getElementById("keyForPrevButton").keyCodeToSave||{};
-    nextKeyCodeOb = nextKeyCodeOb||document.getElementById("keyForNextButton").keyCodeToSave||{};
+    prevKeyCodeOb = prevKeyCodeOb||document.getElementById("keyForPrevButton").keyCodeToSave;
+    nextKeyCodeOb = nextKeyCodeOb||document.getElementById("keyForNextButton").keyCodeToSave;
     
     updateSpan(document.getElementById("prevButtKeySpan"), prevKeyCodeOb);
     updateSpan(document.getElementById("nextButtKeySpan"), nextKeyCodeOb);
@@ -241,6 +245,41 @@ var updatekeyButtonKeySpans = function(prevKeyCodeOb, nextKeyCodeOb) {
 
 document.getElementById("userNameOrdering").oninput = function() {
     dataChangedAndNotSaved = true;
+};
+
+document.getElementById("haveCollapseCheckbox").oninput = function() {
+    dataChangedAndNotSaved = true;
+};
+
+
+
+document.getElementById("defaultOptionsButton").onclick = function() {
+    /*
+    var setOb = {};
+    setOb[STORAGE_NAME_USER_NAME_SORT] = "default";
+    setOb[STORAGE_NAME_HAVE_COLLAPSE] = true;
+    setOb[STORAGE_NAME_KEY_BOARD_SEARCH] = {
+        useKeyboard: false,
+        prevKeyCode: null,
+        nextKeyCode: null
+    };
+    */
+    var remList = [STORAGE_NAME_USER_NAME_SORT,
+                   STORAGE_NAME_HAVE_COLLAPSE,
+                   STORAGE_NAME_KEY_BOARD_SEARCH];
+    chrome.storage.sync.remove(remList, function() {
+    // Update status to let user know options were saved.
+        restoreOptions();
+        var status = document.getElementById('saveStatus');
+        var prevText = status.textContent;
+        status.textContent = "Oletusasetukset palautettu"
+        status.style.visibility = 'visible'
+        setTimeout(function() {
+            status.style.visibility = 'hidden';
+            status.textContent = prevText;
+        }, 750);
+    });
+    dataChangedAndNotSaved = false;
 };
 
 
@@ -288,12 +327,15 @@ function restoreOptions() {
         document.getElementById('haveCollapseCheckbox').checked = items[STORAGE_NAME_HAVE_COLLAPSE];
         
         var keyBOb = items[STORAGE_NAME_KEY_BOARD_SEARCH];
-        document.getElementById("searchWithKeyboardCheckbox").checked = keyBOb.useKeyboard;
-        document.getElementById("keyForPrevButton").keyCodeToSave = keyBOb.prevKeyCode;
-        document.getElementById("keyForNextButton").keyCodeToSave = keyBOb.nextKeyCode;
-        updatekeyButtonKeySpans(keyBOb.prevKeyCode, keyBOb.nextKeyCode);
-        //hide set area if not using
-        document.getElementById("keysForFindDiv").style.display = keyBOb.useKeyboard ? "block" : "none";
+        if (keyBOb) {
+            document.getElementById("searchWithKeyboardCheckbox").checked = keyBOb.useKeyboard;
+            document.getElementById("keyForPrevButton").keyCodeToSave = keyBOb.prevKeyCode;
+            document.getElementById("keyForNextButton").keyCodeToSave = keyBOb.nextKeyCode;
+            updatekeyButtonKeySpans(keyBOb.prevKeyCode, keyBOb.nextKeyCode);
+            //hide set area if not using
+            document.getElementById("keysForFindDiv").style.display = keyBOb.useKeyboard ? "block" : "none";
+        }
+        
     });
 }
 

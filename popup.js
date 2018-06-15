@@ -212,13 +212,15 @@ var findNameInput = document.getElementById("finduserNameInput");
 var findPrevButton = document.getElementById("findUserPrevButton");
 var findNextButton = document.getElementById("findUserNextButton");
 var findUserSortSelect = document.getElementById("findUserSortSelect");
-    
+
+/* can be done with .value
 findUserSortSelect.getSelection = function() {
     for (let c of this.children) {
         if (c.selected) return c;
     }
     return null;
 };
+*/
     
 /** number that tells how manyeth message want to find (not bounded, can also be negative)
  *  need to wrap over total post count when used.
@@ -233,9 +235,9 @@ var findButtonClick = function(postIndIncr) {
     postIndex += postIndIncr;
     var uN = findNameInput.value.trim();
     
-    let selectedSortEl = findUserSortSelect.getSelection();
-    let selectedSort = selectedSortEl ? selectedSortEl.value : null;
-    sendMsg({findUserPost: true, username: uN, postIndex: postIndex, sortBy: selectedSort});
+    sendMsg({findUserPost: true, username: uN,
+             postIndex: postIndex,
+             sortBy: findUserSortSelect.value});
     
 };
     
@@ -249,7 +251,7 @@ findNextButton.onclick = function() {
     
 findNameInput.oninput = function() {
     postIndex = null; //start anew for new username input
-}
+};
 
 }
 //--------------------------------------------------------------------------------------------

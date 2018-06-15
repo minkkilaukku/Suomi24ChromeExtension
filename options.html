@@ -19,7 +19,7 @@
     Käyttäjänimien järjestys valikossa
     <select id="userNameOrdering">
      <option value="alphabetical">Aakkosjärjestys</option>
-     <option value="default">Paikka ketjussa</option>
+     <option value="default" selected>Paikka ketjussa</option>
     </select>
 
         <br>
@@ -38,15 +38,20 @@
     </label>
     <div id="keysForFindDiv" style="display: none;">
         <button id=keyForPrevButton>Edellinen</button>
-        <span id="prevButtKeySpan"></span>
+        <span id="prevButtKeySpan">[ei asetettu]</span>
         <button id=keyForNextButton>Seuraava</button>
-        <span id="nextButtKeySpan"></span>
-        <div id="keySetText"></div>
+        <span id="nextButtKeySpan">[ei asetettu]</span>
+        <div id="keySetText" style="visibility: hidden;">Näppäile haluamasi näppäin(yhdistelmä)</div>
     </div>
 
     <div id="saveDiv">
     <button id="saveButton">Tallenna</button>
     <div id="saveStatus" style="visibility: hidden;">Asetukset tallennettu.</div>
+    </div>
+    
+    
+    <div id="defaultOptionsDiv">
+    <button id="defaultOptionsButton">Palauta oletusasetukset</button>
     </div>
         
 </div>

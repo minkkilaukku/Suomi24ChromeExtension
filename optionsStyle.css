@@ -32,12 +32,14 @@ input[type="checkbox"] {
 }
 
 #keysForFindDiv button:focus {
-    background: orange;
+    background: limegreen;
 }
 
 #keysForFindDiv span {
     display: inline-block;
     background: "#ccc";
+    color: cadetblue;
+    background: white;
     min-width: 50px;
     font-size: 14px;
     margin-left: 2px;
@@ -47,6 +49,8 @@ input[type="checkbox"] {
 
 #keySetText {
     font-size: 14px;
+    color: limegreen;
+    background: white;
 }
 
 
@@ -62,4 +66,14 @@ input[type="checkbox"] {
 #saveStatus {
     margin-top: 5px;
     color: green;
+}
+
+
+#defaultOptionsDiv {
+    position: inline-block;
+    float: right;
+}
+
+#defaultOptionsButton {
+    font-size: 10px;
 }
