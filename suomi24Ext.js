@@ -342,7 +342,7 @@ var getStoredKeyboardFindingMsg = function(callBack) {
 
 
 var setKeyboardFindMsgListener = function(ob) {
-    if (ob.useKeyboard) {
+    if (ob && ob.useKeyboard) {
         var postInd = 0; //assume want to go to the most recent (with prev button) first
         
         var checkKeyCodeFunc = function(keyCode, event) {
