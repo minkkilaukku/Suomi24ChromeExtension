@@ -198,6 +198,18 @@ var getContainerOfUserEl = function(userEl) {
     return res;
 };
 
+
+var showPostIndexInfo = function(postNumber, totalPosts, postContainer) {
+    postIndexInfo.textContent = "Viesti "+postNumber+"/"+totalPosts;
+    var bdd = postContainer.getBoundingClientRect();
+    var infoBdd = postIndexInfo.getBoundingClientRect();
+    postIndexInfo.style.display = "block";
+    var infoW = Math.max(75, infoBdd.width);
+    postIndexInfo.style.left = (bdd.left-infoW-10)+"px";
+    postIndexInfo.style.top = (bdd.top + window.scrollY)+"px";
+};
+
+
 /**
 * scroll the page to the @postIndex'th (in the ordering given by @sortBy)
 * post of user @userName (the container of the post is used to give the scroll position).
@@ -212,6 +224,7 @@ var scrollToUserPost = function(userName, postIndex, sortBy) {
         if (container) {
             var topPos = container.getBoundingClientRect().top + window.scrollY;
             window.scrollTo(0, topPos);
+            showPostIndexInfo(elInd+1, elsN, container);
         }
     }
     
@@ -380,5 +393,36 @@ getStoredUserHighlights( res => highlightUserPosts(res) );
 // set keyboard control of finding most recent posts
 getStoredKeyboardFindingMsg( setKeyboardFindMsgListener );
 
+var postIndexInfo = document.createElement("div");
+postIndexInfo.id = "postIndexInfo";
+postIndexInfo.style.display = "none";
+document.body.appendChild(postIndexInfo);
+
+//TODO how to hide, this way won't allow to click for input
+//document.body.addEventListener("click", _=>postIndexInfo.style.display="none");
+
+var postIndexInput = document.createElement("input");
+postIndexInfo.tabIndex = 12;
+postIndexInfo.addEventListener("keydown", function(evt) {
+    if (evt.keyCode===13) {
+        if (postIndexInfo.getElementsByTagName("input").length) {
+            //why won't postIndexInfo.value work here?? Why have to get the input like this:
+            postIndex = parseInt(postIndexInfo.getElementsByTagName("input")[0].value)-1;
+            scrollToUserPost("", postIndex, "time");
+        }
+    }
+});
+var postIndexClickHandler = evt=>{
+    evt.preventDefault();
+    if (!postIndexInfo.getElementsByTagName("input").length) {
+        var endPart = postIndexInfo.textContent.split("/")[1];
+        postIndexInfo.innerHTML = "Viesti ";
+        postIndexInfo.appendChild(postIndexInput);
+        postIndexInfo.innerHTML += "/"+endPart;
+        //why won't postIndexInput.focus() work??? the element appended is postIndexInput, right (?)
+        postIndexInfo.getElementsByTagName("input")[0].focus();
+    }
+};
+postIndexInfo.addEventListener("click", postIndexClickHandler);
 
 //TODO swear word filter

@@ -58,3 +58,16 @@
     transform: scaleY(0);
     
 }
+
+
+#postIndexInfo {
+    position: absolute;
+    font-size: 14px;
+    color: cyan;
+    background: rgba(250, 100, 50, 0.6);
+}
+
+#postIndexInfo input {
+    width: 20px;
+    color: black;
+}
