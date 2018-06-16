@@ -62,12 +62,44 @@
 
 #postIndexInfo {
     position: absolute;
-    font-size: 14px;
-    color: cyan;
-    background: rgba(250, 100, 50, 0.6);
+    font-size: 15px;
+    width: 50%;
+    text-align: right;
+    margin-left: 50%;
+    padding-right: 18px;
+    box-shadow: -3px 4px 7px black;
+    background-color: #53ad6b;
+    color: #fffb00;
+    text-shadow: 2px 0px black;
 }
 
+
+#postIndexInfo .percentBarHolder {
+    position: relative;
+    display: inline-block;
+    margin-right: 10px;
+    width: 40%;
+    border: 1px solid black;
+    text-align: center;
+    background-color: rgba(0, 0, 250, 0.2);
+    color: black;
+    text-shadow: none;
+}
+
+
+#postIndexInfo .percentBar {
+    position: absolute;
+    display: inline-block;
+    left: 0;
+    top: 0;
+    width: 0;
+    height: 100%;
+    background-color: rgba(0, 0, 250, 0.7);
+    text-align: center;
+}
+
+
 #postIndexInfo input {
-    width: 20px;
+    width: 40px;
     color: black;
 }

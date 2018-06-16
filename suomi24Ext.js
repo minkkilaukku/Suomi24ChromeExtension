@@ -198,15 +198,27 @@ var getContainerOfUserEl = function(userEl) {
     return res;
 };
 
+/** Is the given element the user info of the first post  */
+var isFirstPostUserEl = function(el) {
+    return el.parentElement.parentElement.classList.contains("thread");
+};
+
 
 var showPostIndexInfo = function(postNumber, totalPosts, postContainer) {
-    postIndexInfo.textContent = "Viesti "+postNumber+"/"+totalPosts;
+    var percent = postNumber/totalPosts*100;
+    var perBarHtml = "<span class='percentBar' style='width: "+percent+"%;'></span>"
+    postIndexInfo.innerHTML = "<span class='percentBarHolder'>"
+        +Math.round(percent)+"%"+perBarHtml+"</span> Aktiivi viesti "
+        +postNumber+"/"+totalPosts;
     var bdd = postContainer.getBoundingClientRect();
     var infoBdd = postIndexInfo.getBoundingClientRect();
     postIndexInfo.style.display = "block";
+    postContainer.insertAdjacentElement("afterbegin", postIndexInfo);
+    /*
     var infoW = Math.max(75, infoBdd.width);
     postIndexInfo.style.left = (bdd.left-infoW-10)+"px";
     postIndexInfo.style.top = (bdd.top + window.scrollY)+"px";
+    */
 };
 
 
@@ -220,11 +232,23 @@ var scrollToUserPost = function(userName, postIndex, sortBy) {
     var elsN = userEls.length;
     if (elsN>0) {
         var elInd = (postIndex%elsN+elsN)%elsN;
-        var container = getContainerOfUserEl(userEls[elInd]);
-        if (container) {
-            var topPos = container.getBoundingClientRect().top + window.scrollY;
-            window.scrollTo(0, topPos);
-            showPostIndexInfo(elInd+1, elsN, container);
+        var el = userEls[elInd];
+        //the first post doesn't have a similar container as answers and comments
+        //so it must be handled separately
+        if (isFirstPostUserEl(el)) { //the starting post
+            var threadHeader = document.getElementsByClassName("thread-header")[0];
+            if (threadHeader) {
+                var topPos = threadHeader.getBoundingClientRect().top + window.scrollY;
+                window.scrollTo(0, topPos);
+                showPostIndexInfo(elInd+1, elsN, el.parentElement); //use the user-info-big as container
+            }
+        } else { //answers and comments
+            var container = getContainerOfUserEl(el);
+            if (container) {
+                var topPos = container.getBoundingClientRect().top + window.scrollY;
+                window.scrollTo(0, topPos);
+                showPostIndexInfo(elInd+1, elsN, container);
+            }
         }
     }
     
@@ -396,6 +420,7 @@ getStoredKeyboardFindingMsg( setKeyboardFindMsgListener );
 var postIndexInfo = document.createElement("div");
 postIndexInfo.id = "postIndexInfo";
 postIndexInfo.style.display = "none";
+postIndexInfo.innerHTML = "<span class=percentBar>0%</span> Aktiivi viesti 0/0";
 document.body.appendChild(postIndexInfo);
 
 //TODO how to hide, this way won't allow to click for input
@@ -408,7 +433,7 @@ postIndexInfo.addEventListener("keydown", function(evt) {
         if (postIndexInfo.getElementsByTagName("input").length) {
             //why won't postIndexInfo.value work here?? Why have to get the input like this:
             postIndex = parseInt(postIndexInfo.getElementsByTagName("input")[0].value)-1;
-            scrollToUserPost("", postIndex, "time");
+            scrollToUserPost(cachedUserName||"", postIndex, cachedSortBy||"time");
         }
     }
 });
@@ -416,12 +441,11 @@ var postIndexClickHandler = evt=>{
     evt.preventDefault();
     if (!postIndexInfo.getElementsByTagName("input").length) {
         var endPart = postIndexInfo.textContent.split("/")[1];
-        postIndexInfo.innerHTML = "Viesti ";
+        postIndexInfo.innerHTML = "Mene viestiin ";
         postIndexInfo.appendChild(postIndexInput);
         postIndexInfo.innerHTML += "/"+endPart;
-        //why won't postIndexInput.focus() work??? the element appended is postIndexInput, right (?)
-        postIndexInfo.getElementsByTagName("input")[0].focus();
     }
+    postIndexInfo.getElementsByTagName("input")[0].focus();
 };
 postIndexInfo.addEventListener("click", postIndexClickHandler);
 
