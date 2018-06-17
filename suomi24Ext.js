@@ -130,6 +130,30 @@ var getAllNamesOnPostsData = function() {
     return res;
 };
 
+/** Get all posts in the thread with dates
+ * @return list of objects {username, date}
+*/
+var getPostsForStatistics = function() {
+    let timeStampGetter = el=>{
+        var tSEl = el.parentElement.getElementsByClassName("user-info-timestamp")[0];
+        if (tSEl) return tSEl.textContent.trim();
+        return "1.1.1900 00:00";
+    };
+    let dateMaker = ts => {
+        var [da, ti] = ts.split(" ");
+        var [day, month, year] = da.split(".");
+        var [hour, minute] = ti.split(":");
+        //month is zero-based (doesn't affect ordering but make it still correct)
+        return new Date(year, month-1, day, hour, minute, 0); //-1 converts to number
+    };
+    
+    var userEls = Array.from(document.querySelectorAll("p.user-info-name"));
+    return userEls.map(el=>{
+        //have to use string of date
+        return {username: el.textContent.trim(), date: dateMaker(timeStampGetter(el)).toString()};
+    });
+};
+
 
 var cachedUserEls = [];
 var cachedUserName = null;
@@ -198,11 +222,13 @@ var getContainerOfUserEl = function(userEl) {
     return res;
 };
 
-/** Is the given element the user info of the first post  */
+//VITTU PERKELE SAATANA!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!11
+/** Is the given element the user info of the first post  
 var isFirstPostUserEl = function(el) {
-    return el.parentElement.parentElement.classList.contains("thread");
+    return el.parentElement.parentElement.classList.contains("thread")
+        && el.previousElementSibling.previousElementSibling.classList.contains("thread-header");
 };
-
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
 
 var showPostIndexInfo = function(postNumber, totalPosts, postContainer) {
     var percent = postNumber/totalPosts*100;
@@ -238,19 +264,19 @@ var scrollToUserPost = function(userName, postIndex, sortBy) {
         var el = userEls[elInd];
         //the first post doesn't have a similar container as answers and comments
         //so it must be handled separately
-        if (isFirstPostUserEl(el)) { //the starting post
+        if (el === document.querySelector("p.user-info-name")) { //the starting post
             var threadHeader = document.getElementsByClassName("thread-header")[0];
             if (threadHeader) {
                 var topPos = threadHeader.getBoundingClientRect().top + window.scrollY;
                 window.scrollTo(0, topPos);
                 showPostIndexInfo(elInd+1, elsN, el.parentElement); //use the user-info-big as container
             }
-        } else { //answers and comments
+        } else {//answers and comments
             var container = getContainerOfUserEl(el);
             if (container) {
+                showPostIndexInfo(elInd+1, elsN, container); //this changes the size, so put it in first
                 var topPos = container.getBoundingClientRect().top + window.scrollY;
                 window.scrollTo(0, topPos);
-                showPostIndexInfo(elInd+1, elsN, container);
             }
         }
     }
@@ -272,6 +298,7 @@ var sendGotUserHLsMsg = function(hlMap) {
         hlMap: hlMap
     });
 };
+
 
 var gotMessage = function(msg, sender, sendResponse) {
     //console.log(msg);
@@ -297,6 +324,8 @@ var gotMessage = function(msg, sender, sendResponse) {
         sendResponse(getAllNamesOnPostsData());
     } else if (msg.findUserPost) {
         scrollToUserPost(msg.username, msg.postIndex, msg.sortBy);
+    } else if  (msg.getPostsStat) {
+        sendResponse(getPostsForStatistics());
     }
     
     

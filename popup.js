@@ -1,6 +1,6 @@
 
 
-var divs = [document.getElementById("findPosts"), document.getElementById("highlightPosts"), document.getElementById("hidePosts")];
+var divs = [document.getElementById("findPosts"), document.getElementById("highlightPosts"), document.getElementById("hidePosts"), document.getElementById("statisticsPosts")];
 
 var tabs = Array.from(document.getElementById("tabs").children);
 
@@ -166,8 +166,7 @@ var getHideCheckedUserNames = function() {
 
 
 //----------------------- highlight posts -------------------------------------------------------------
-{
-    
+{ 
 var hLNameInput = document.getElementById("hlNameInput");
 var hLColorInput = document.getElementById("hlColorInput");
 var hLSetButton = document.getElementById("hlSetButton");
@@ -268,7 +267,7 @@ sendMsg({getUserHighlights: true});
 
 //----------------------- find posts -------------------------------------------------------------
 {
-
+    
 var findNameInput = document.getElementById("finduserNameInput");
 var findPrevButton = document.getElementById("findUserPrevButton");
 var findNextButton = document.getElementById("findUserNextButton");
@@ -319,6 +318,219 @@ findNameInput.oninput = function() {
 
     
     
+// -------------- posts statistics -------------------------------------------------------------
+
+var statCanvas = document.getElementById("statCanvas");
+var statTimeRange = document.getElementById("statTimeRange");
+var statTimeText = document.getElementById("statTimeText");
+var statToolTip = document.getElementById("statToolTip");
+
+var getPostsPerDay = function(posts, days) {
+    
+    var currDate = new Date();
+    currDate.setHours(23);
+    currDate.setMinutes(59);
+    currDate.setMilliseconds(999); //set to end of today to make day boundaries correct
+    var res = new Array(days).fill(null).map((_,i)=>{
+        var dateForOb = new Date();
+        dateForOb.setDate(dateForOb.getDate()-(days-1-i));
+        return {postCount:0, date:dateForOb};
+    });
+    var MS_PER_DAY = 1000*60*60*24;
+    for (let post of posts) {
+        let daysAgo = ((currDate-post.date)/MS_PER_DAY)|0;
+        if (daysAgo<res.length && daysAgo>=0) { //don't count posts in future, either :)
+            res[res.length-1-daysAgo].postCount += 1; //order so that last is the current day
+        }
+    }
+    return res;
+    
+};
+
+
+var getDaysAgo = function(date) {
+    var currDate = new Date();
+    currDate.setHours(23);
+    currDate.setMinutes(59);
+    currDate.setMilliseconds(999);
+    var MS_PER_DAY = 1000*60*60*24;
+    return ((currDate-date)/MS_PER_DAY)|0;
+};
+
+var dateDdMmYy = function(date, sep="-") {
+  var mm = date.getMonth() + 1;
+  var dd = date.getDate();
+  return [(dd>9 ? "" : "0") + dd,
+          (mm>9 ? "" : "0") + mm,
+          date.getFullYear()%100
+         ].join(sep);
+};
+
+var max = arr => Math.max.apply(Math, arr);
+
+/** How many x-values to label when there are days many bars */
+var getXStepsForDays = function(days) {
+    //steps means that there are +1 labels drawn
+    
+    if (days<=5) return days+1; //can fit for every day
+    if (days<=7) return 2;
+    if (days===8) return 3;
+    if (days===9) return 4;
+    if (days<=12) return 3;
+    return 4;
+};
+
+
+var postsForStat = []; //this will be set with message;
+
+var barChartVars = { //this will be set in draw
+    y0: 0,
+    x0: 0,
+    y1: 0,
+    x1: 0,
+    barW: 0,
+    postsPerDay: []
+};
+
+var getOnBar = function(x, y) {
+    if (barChartVars.x0<=x && x<=barChartVars.x1 && barChartVars.y1<=y && y<=barChartVars.y0) {
+        return barChartVars.postsPerDay[((x-barChartVars.x0)/barChartVars.barW)|0];
+    }
+    return null;
+};
+
+var drawStat = function() {
+    
+    let posts = postsForStat;
+    var ctx = statCanvas.getContext("2d");
+    var w = statCanvas.width;
+    var h = statCanvas.height;
+    ctx.clearRect(0,0,w,h);
+    var days = posts.length ? (getDaysAgo(posts[0].date)+1) : 1;
+    var maxDays = +statTimeRange.value;
+    if (days>maxDays) days = maxDays;
+    console.log("days = "+days, typeof days);
+    var postsPerDay = barChartVars.postsPerDay = getPostsPerDay(posts, days);
+    
+    var y0 = barChartVars.y0 = h-30;
+    var x0 = barChartVars.x0 = 30;
+    var y1 = barChartVars.y1 = 10;
+    var x1 = barChartVars.x1 = w-20;
+    var barW = barChartVars.barW = (x1-x0)/days;
+    var drawBarW = Math.max(barW, 1); //draw at least 1px bars
+    var maxP = max(postsPerDay.map(({postCount})=>postCount));
+    var sclY = (y0-y1)/(maxP||1);
+    var y=50;
+    var x = x0;
+    ctx.fillStyle = "#00ff60";
+    ctx.strokeStyle = "#222222";
+    ctx.lineWidth = 1;
+    for (let ob of postsPerDay) {
+        let yTop = y0-(sclY*ob.postCount);
+        let barH = y0 -yTop;
+        
+        ctx.fillRect(x, yTop, drawBarW, barH);
+        ctx.strokeRect(x, yTop, drawBarW, barH);
+        x += barW;
+    }
+    
+    ctx.font = "10px Helvetica";
+    
+    //y-axis
+    ctx.strokeStyle = "#000000";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(x0, y0);
+    ctx.lineTo(x0, y1);
+    ctx.stroke();
+    
+    
+    ctx.textAlign = "right";
+    var marginYAxis = 5;
+    ctx.textBaseline = "middle";
+    ctx.fillStyle = "#000000";
+    var ySteps = 4;
+    if (maxP<3) ySteps = maxP+1;
+    for (let i=0; i<=ySteps; i++) {
+        let per = i/ySteps;
+        let yCoord = y0 - (y0-y1)*per;
+        let yVal = Math.round(maxP*per);
+        ctx.fillText(yVal, x0-marginYAxis, yCoord);
+    }
+    
+    
+    //x-axis
+    ctx.strokeStyle = "#000000";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(x0, y0);
+    ctx.lineTo(x1, y0);
+    ctx.stroke();
+    
+    
+    ctx.textAlign = "center";
+    ctx.textBaseline = "top";
+    var marginXAxis = 5;
+    ctx.fillStyle = "#000000";
+    var xSteps = getXStepsForDays(days);
+    console.log("got "+xSteps+" x-steps for "+days);
+    for (let i=0; i<=xSteps; i++) {
+        let per = i/xSteps;
+        let xCoord = x0 + (x1-x0)*per;
+        var indForDate = Math.floor((postsPerDay.length-1)*per);
+        let xVal = dateDdMmYy(postsPerDay[indForDate].date);
+        ctx.fillText(xVal, x0+barW*(indForDate+0.5), y0+marginXAxis); //center for bar at ind
+    }
+};
+
+
+statCanvas.onmousemove = function(evt) {
+    var x = evt.clientX-statCanvas.offsetLeft;
+    var y = evt.clientY-statCanvas.offsetTop;
+    var onBar = getOnBar(x, y);
+    if (onBar) {
+        statToolTip.innerHTML = "<span class='date'>"+dateDdMmYy(onBar.date)+"</span><br>"
+            +"<span class='postCount'>"+onBar.postCount+"</span>";
+        statToolTip.style.display = "block";
+        if (evt.clientX<150) {
+            statToolTip.style.left =(evt.clientX+15)+"px";
+        } else {
+            let toolTipBdd = statToolTip.getBoundingClientRect();
+            statToolTip.style.left = (evt.clientX-toolTipBdd.width-15)+"px";
+        }
+        statToolTip.style.top = evt.clientY+"px";
+    } else {
+        statToolTip.style.display = "none";
+    }
+};
+
+statCanvas.onmouseout = function(evt) {
+    statToolTip.style.display = "none";
+};
+
+var updateStatText = function() {
+    statTimeText.innerHTML = "<span class='daysNumber'>"+statTimeRange.value+"</span> päivää";
+}
+
+statTimeRange.oninput = function() {
+    updateStatText();
+    drawStat();
+};
+
+
+/* this can be done with response function, since not gotten from storage */
+sendMsg({getPostsStat: true}, function(statData) {
+    if (statData) {
+        postsForStat = statData.map(ob=>{return {username: ob.username, date: new Date(ob.date)}});
+        statTimeRange.max = postsForStat[0] ? getDaysAgo(postsForStat[0].date)+1 : 1;
+        updateStatText();
+        drawStat();
+    }
+});
+
+
+//--------------------------------------------------------------------------------------------
+
 
 
 /** Not used, since autocompletion done with datalist, but if we would like to render

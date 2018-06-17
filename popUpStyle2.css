@@ -1,0 +1,313 @@
+body {
+    min-width: 250px;
+    min-height: 250px;
+}
+
+html {
+
+border: 1px;
+    border-bottom: 2px;
+    box-shadow: 4px 2px 4px 2px #383434;
+    border-radius: 4px;
+    border-style: solid;
+    background-color: #5DA1DC;
+    font-family: 'Lato 5r',sans-serif, verdana, monospace;
+    font-size: 14px;
+    box-shadow: 4px 4px black;
+    box-shadow: inset -1px -2px 8px #02020287;
+	
+}
+
+#hideUsersInputDiv {
+    background: #ddd;
+    max-height: 250px;
+    overflow: auto;
+}
+
+#hideUsersInputDiv div:nth-child(odd) {
+    background: rgba(100, 100, 200, 0.4);
+}
+
+#hideUsersInputDiv div:nth-child(even) {
+    background: rgba(250, 250, 250, 0.4);
+}
+
+#hideUsersInputDiv input[type="checkbox"] {
+    max-height: 250px;
+    overflow: auto;
+}
+
+
+#alwaysRemoveUsersLab {
+    position: relative;
+    display: block;
+    margin-top: 7px;
+}
+
+#alwaysRemoveUsersContainer {
+    overflow-y: auto;
+    overflow-x: auto;
+    max-height: 280px;
+    max-width: 210px;
+}
+
+#alwaysRemoveUsersContainer p {
+    margin: 0;
+    font: 12px Helvetica;
+}
+
+#alwaysRemoveUsersContainer p:hover {
+    border: 1px solid blue;
+}
+
+#alwaysRemoveUsersContainer p:nth-child(odd) {
+    background: lightblue;
+}
+
+#alwaysRemoveUsersContainer p:nth-child(even) {
+    background: lightcyan;
+}
+
+
+button {
+    margin-top: 7px;
+}
+
+#clearAlwaysRemoveButton {
+    font: 10px Helvetica;
+}
+
+
+#hlListLabel  {
+    position: relative;
+    display: inline-block;
+    margin-top: 14px;
+}
+
+
+#hlList {
+    max-height: 280px;
+    max-width: 210px;
+    overflow: auto;
+}
+
+
+
+.hlListElem input {
+    display: inline-block;
+    margin-left: 4px;
+    max-width: 20px;
+}
+
+
+.hlListElem:nth-child(odd) {
+    background: lightblue;
+}
+
+
+.hlListElem:nth-child(even) {
+    background: lightcyan;
+}
+
+
+.hlListElem button {
+    color: red;
+    font-size: 10px;
+    margin-left: 5px;
+    line-height: 16px;
+}
+
+
+.hlListElem label {
+    font-size: 12px;
+    font-weight: bold;
+}
+
+
+#clearAllHlsButton {
+    margin-top: 7px;
+    font-size: 10px;
+}
+
+
+.findUserButtonsDiv {
+    text-align: center;
+}
+
+
+.findUserButtonsDiv button{
+    font: 15px Helvetica;
+    font-weight: 400;
+}
+
+
+#findUserPrevButton {
+    text-align: center;
+    display: inline-block;
+    border: 1px solid black;
+    font: 14px Helvetica;
+    /*font-weight: 900;*/
+    cursor: pointer;
+    background: #5DA1DC;
+    background-image: linear-gradient(to bottom, #3498db, #2980b9);
+    border-radius: 5px;
+    box-shadow: 0px 1px 3px #666666;
+    font-family: Arial;
+    color: #ffffff;
+    font-size: 14px;
+    padding: 3px 12px 4px 12px;
+    text-decoration: none;
+	width: 110px;
+}
+
+
+#findUserNextButton {
+    text-align: center;
+    display: inline-block;
+    border: 1px solid black;
+    font: 14px Helvetica;
+    /*font-weight: 900;*/
+    cursor: pointer;
+    background: #5DA1DC;
+    background-image: linear-gradient(to bottom, #3498db, #2980b9);
+    border-radius: 5px;
+    box-shadow: 0px 1px 3px #666666;
+    font-family: Arial;
+    color: #ffffff;
+    font-size: 14px;
+    padding: 3px 12px 4px 12px;
+    text-decoration: none;
+	width: 110px;
+	margin-left: 20px;
+}
+
+
+.finduserNameInput {
+	padding-right: 5px;
+    height: 24px;
+    padding-left: 5px;
+    width: 100%;
+    font-family: 'Lato 5r',sans-serif, verdana, monospace;
+	
+}
+
+#tabs {
+    position: relative;
+    background: #0076D0;
+    margin: 0;
+    margin-bottom: 18px;
+    width: 100%;
+    text-align: center;
+    height: 32px;
+    padding-top: 7px;
+    padding-left: 0px;
+    padding-right: 0px;
+	border-radius: 6px;
+}
+
+
+#tabs span {
+    text-align: center;
+    display: inline-block;
+    border: 1px solid black;
+    cursor: pointer;
+    background: #5DA1DC;
+    background-image: linear-gradient(to bottom, #3498db, #2980b9);
+    border-radius: 5px;
+    box-shadow: 0px 1px 3px #666666;
+    font-family: Arial;
+    color: #ffffff;
+    font-size: 12px;
+    padding: 3px 5px 3px 5px;
+    text-decoration: none;
+	width: 45px;
+}
+
+
+#tabs span:hover {
+  background: #66bff7;
+  background-image: -webkit-linear-gradient(top, #66bff7, #3498db);
+  background-image: -moz-linear-gradient(top, #66bff7, #3498db);
+  background-image: -ms-linear-gradient(top, #66bff7, #3498db);
+  background-image: -o-linear-gradient(top, #66bff7, #3498db);
+  background-image: linear-gradient(to bottom, #66bff7, #3498db);
+  text-decoration: none;
+}
+
+
+#tabs span:hover[active="false"]  {
+    background: rgba(120, 120, 255, 0.4);
+	color:red;
+	background: #66bff7;
+  	background-image: -webkit-linear-gradient(top, #66bff7, #3498db);
+  	background-image: -moz-linear-gradient(top, #66bff7, #3498db);
+  	background-image: -ms-linear-gradient(top, #66bff7, #3498db);
+  	background-image: -o-linear-gradient(top, #66bff7, #3498db);
+  	background-image: linear-gradient(to bottom, #66bff7, #3498db);
+  	text-decoration: none;
+}
+
+
+#tabs span:hover[active="true"]  {
+    background: rgba(120, 120, 255, 0.4);
+	color:red;
+	background: #66bff7;
+  	background-image: -webkit-linear-gradient(top, #66bff7, #3498db);
+  	background-image: -moz-linear-gradient(top, #66bff7, #3498db);
+  	background-image: -ms-linear-gradient(top, #66bff7, #3498db);
+  	background-image: -o-linear-gradient(top, #66bff7, #3498db);
+  	background-image: linear-gradient(to bottom, #66bff7, #3498db);
+  	text-decoration: none;
+}
+
+
+#finduserNameInput {
+	padding-right: 5px;
+    height: 24px;
+    padding-left: 5px;
+    width: 100%;
+    font-family: 'Lato 5r',sans-serif, verdana, monospace;
+    font-size: 14px;
+	box-shadow: inset 0px 1px 8px black;
+
+}
+
+
+#findPosts label {
+    font-family: 'Lato 5r',sans-serif, verdana, monospace;
+    font-size: 14px;
+	
+}
+
+#statTimeRange {
+    font-size: 14px;
+    vertical-align: middle;
+}
+
+#statTimeText {
+    font-size: 14px;
+}
+
+#statTimeText .daysNumber{
+    font-weight: 700;
+}
+
+#statToolTip {
+    position: absolute;
+    background-color: rgba(250, 144, 166, 0.8);
+    pointer-events: none;
+    text-align: center;
+    border: 2px solid white;
+    border-radius: 4px;
+    box-shadow: 0px 1px 8px black;
+    padding: 3px;
+}
+
+#statToolTip .date{
+    font-size: 12px;
+}
+
+#statToolTip .postCount{
+    font-size: 14px;
+    font-weight: 900;
+}

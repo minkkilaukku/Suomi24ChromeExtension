@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width">
     <title>Suomi24 Extension</title>
     
-    <link rel="stylesheet" href="popupStyle.css" type="text/css">
+    <link rel="stylesheet" href="popupStyle2.css" type="text/css">
     <!--link rel="stylesheet" href="auto-complete.css" type="text/css"-->
     
 </head>
@@ -16,6 +16,7 @@
         <span active="true"> Etsi </span>
         <span active="false"> Korosta </span>
         <span active="false"> Piilota </span>
+        <span active="false">Tilasto</span>
     </div>
     
     
@@ -80,6 +81,26 @@
                 <!--option value="place">Paikka ketjussa</option-->
             </div>
         
+    </div>
+    
+    
+    
+    <div id="statisticsPosts">
+        <h2>Viestejä päivässä</h2>
+    <canvas id="statCanvas"></canvas>
+        
+    <div id=statTimeDiv>
+        <label>
+            Näytä tilasto (maksimissaan) ajalta
+            <br>
+            <input id="statTimeRange" type="range" min="2" max="360" value="30">
+        </label>
+        <span id="statTimeText"><span class="daysNumber">30</span>30 päivää</span>
+        <!--label><input type="radio" value="30" name="statTime" checked> (max) 30 päivää</label>
+        <label><input type="radio" value="360" name="statTime"> (max) 360 päivää</label>
+        <label><input type="radio" value="Infinity" name="statTime"> kaikki</label-->
+    </div>
+    <div id="statToolTip" style="display: none;"></div>
     </div>
     
     
