@@ -206,10 +206,13 @@ var isFirstPostUserEl = function(el) {
 
 var showPostIndexInfo = function(postNumber, totalPosts, postContainer) {
     var percent = postNumber/totalPosts*100;
-    var perBarHtml = "<span class='percentBar' style='width: "+percent+"%;'></span>"
+    var perBarHtml = "<progress class='percentBar' max='100' value='"+percent+"'></progress>";
+    
     postIndexInfo.innerHTML = "<span class='percentBarHolder'>"
-        +Math.round(percent)+"%"+perBarHtml+"</span> Aktiivi viesti "
-        +postNumber+"/"+totalPosts;
+        +perBarHtml+
+        "<p class='textPercentInside'>"+Math.round(percent)+"%"+"</p></span>"
+        +" Aktiivi viesti "+postNumber+"/"+totalPosts;
+    
     var bdd = postContainer.getBoundingClientRect();
     var infoBdd = postIndexInfo.getBoundingClientRect();
     postIndexInfo.style.display = "block";

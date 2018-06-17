@@ -239,14 +239,14 @@ var findPrevButton = document.getElementById("findUserPrevButton");
 var findNextButton = document.getElementById("findUserNextButton");
 var findUserSortSelect = document.getElementById("findUserSortSelect");
 
-/* can be done with .value
-findUserSortSelect.getSelection = function() {
-    for (let c of this.children) {
-        if (c.selected) return c;
+//get the checked radiobutton
+findUserSortSelect.getSelectedValue = function() {
+    for (let c of this.getElementsByTagName("input")) {
+        if (c.checked) return c.value;
     }
-    return null;
+    return "";
 };
-*/
+
     
 /** number that tells how manyeth message want to find (not bounded, can also be negative)
  *  need to wrap over total post count when used.
@@ -263,7 +263,7 @@ var findButtonClick = function(postIndIncr) {
     
     sendMsg({findUserPost: true, username: uN,
              postIndex: postIndex,
-             sortBy: findUserSortSelect.value});
+             sortBy: findUserSortSelect.getSelectedValue()});
     
 };
     

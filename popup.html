@@ -70,12 +70,14 @@
         <button id="findUserNextButton">Seuraava</button>
         </div>
         <br>
-        <label> Järjestys:
-            <select id="findUserSortSelect">
-                <option value="time" selected>Aika</option>
-                <option value="place">Paikka ketjussa</option>
-            </select>
-        </label>
+        <label> Järjestys:</label>
+            <div id="findUserSortSelect">
+                <label><input type="radio" name="findUserSortSelect" value="time" checked>Aika</label>
+                <br>
+                <label><input type="radio" name="findUserSortSelect" value="place">Paikka ketjussa</label>
+                <!--option value="place">Paikka ketjussa</option-->
+            </div>
+        
     </div>
     
     
