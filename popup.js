@@ -48,6 +48,20 @@ var sendMsg = function(msg, callBack) {
 var hideUserNameInputDiv = document.getElementById("hideUsersInputDiv");
 var alwaysRemoveList = document.getElementById("alwaysRemoveUsersContainer");
 
+hideUserNameInputDiv.childrenReady = false;
+    
+var checkToAlwaysRemove = function(uN) {
+    sendMsg({removePosts: true, userNames: [uN], removeAlways: true});
+    var prevNameSet = new Set (Array.from(alwaysRemoveList.children).map(x=>x.textContent));
+    if (!prevNameSet.has(uN)) addAlwaysRemoveUser(uN);
+};
+    
+var unCheckToAlwaysRemove = function(uN) {
+    var elsOfUn = (Array.from(alwaysRemoveList.children).filter(x=>x.textContent===uN));
+    if (elsOfUn.length) elsOfUn[0].click(); //click to remove
+};
+
+/* not used, as checkboxes are used to always hide
 document.getElementById("removeUsersPostsButton").onclick = function () {
     //TODO
     var users = getHideCheckedUserNames();
@@ -64,11 +78,12 @@ document.getElementById("alwaysRemoveUsersPostsButton").onclick =  function() {
         if (!prevNameSet.has(uN)) addAlwaysRemoveUser(uN);
     }
 };
-
+*/
 
 document.getElementById("clearAlwaysRemoveButton").onclick = function () {
     sendMsg({clearAlwaysRemoves: true});
     setAlwaysRemoveUsers([]);
+    setHideUserCheckeds(new Set());
 };
 
 
@@ -111,8 +126,28 @@ var fillHideUserDiv = function(userNames) {
         el.appendChild(elLab);
         let elCheck = document.createElement("input");
         elCheck.type = "checkbox";
+        elCheck.oninput = function() {
+            if (elCheck.checked) {
+                checkToAlwaysRemove(uOb.username);
+            } else {
+                unCheckToAlwaysRemove(uOb.username);
+            }
+        };
         elLab.appendChild(elCheck);
         elLab.appendChild(document.createTextNode(uOb.username));
+    }
+    hideUserNameInputDiv.childrenReady = true;
+    if (hideUserNameInputDiv.childrenToCheck) {
+        setHideUserCheckeds(hideUserNameInputDiv.childrenToCheck);
+    }
+};
+
+/** Set the username checkboxes checked-values to whether they are in the set or not */
+var setHideUserCheckeds = function(setOfUsernames) {
+    for (let c of hideUserNameInputDiv.getElementsByTagName("input")) {
+        if (c.getAttribute("type")==="checkbox") {
+            c.checked = setOfUsernames.has(c.parentElement.textContent);
+        }
     }
 };
     
@@ -372,6 +407,12 @@ chrome.runtime.onMessage.addListener(
         if (msg.gotUsersToRemoveAlways) {
             //console.log("got message about users to remove always: ",msg.userNames);
             setAlwaysRemoveUsers(msg.userNames);
+            var toCheck = new Set(msg.userNames);
+            if (hideUserNameInputDiv.childrenReady) {
+                setHideUserCheckeds(toCheck);
+            } else {
+                hideUserNameInputDiv.childrenToCheck = toCheck;
+            }
         } else if (msg.gotUserHLs) {
             setUserHlsTo(msg.hlMap);
         }
