@@ -605,6 +605,12 @@ sendMsg({getHintUsers: true}, function(response) {
             if (valFromStore==="alphabetical") {
                 response.sort((a,b)=>a.username.toLowerCase().localeCompare(b.username.toLowerCase()));
                 //console.log("got alphabetical and sorted to", response);
+            } else if (valFromStore==="postCount") {
+                response.sort((a,b)=>{
+                    if (a.postCount < b.postCount) return 1;
+                    if (a.postCount > b.postCount) return -1;
+                    return a.username.toLowerCase().localeCompare(b.username.toLowerCase())
+                });
             }
             setAutoCompletes(response);
         });
