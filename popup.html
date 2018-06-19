@@ -86,16 +86,25 @@
     
     
     <div id="statisticsPosts">
-        <h2>Viestejä päivässä</h2>
+        <h2>Viestien lukumäärä ajanjaksolla</h2>
     <canvas id="statCanvas"></canvas>
         
     <div id=statTimeDiv>
         <label>
-            Näytä tilasto (maksimissaan) ajalta
+            Näytä tilasto ajalta
             <br>
-            <input id="statTimeRange" type="range" min="2" max="360" value="30">
+            <input id="statTimeRange" type="range" min="1" max="360" value="30">
         </label>
-        <span id="statTimeText"><span class="daysNumber">30</span>30 päivää</span>
+        <span id="statTimeText"><span class="daysNumber">30</span> päivää</span>
+        <br>
+        <div id="statTimeUnit">
+        <label>Aikayksikkö:</label>
+        <br>
+        <label><input type="radio" name="statTimeUnit" value="tenMinutes">10 minuuttia</label>
+        <label><input type="radio" name="statTimeUnit" value="hour">Tunti</label>
+        <label><input type="radio" name="statTimeUnit" value="day" checked>Päivä</label>
+        <label><input type="radio" name="statTimeUnit" value="month">Kuukausi</label>
+        </div>
         <!--label><input type="radio" value="30" name="statTime" checked> (max) 30 päivää</label>
         <label><input type="radio" value="360" name="statTime"> (max) 360 päivää</label>
         <label><input type="radio" value="Infinity" name="statTime"> kaikki</label-->

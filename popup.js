@@ -320,10 +320,57 @@ findNameInput.oninput = function() {
     
 // -------------- posts statistics -------------------------------------------------------------
 
+const STAT_CANVAS_W = 280;
+const STAT_CANVAS_H = 150;
+
+
+
 var statCanvas = document.getElementById("statCanvas");
+statCanvas.width = STAT_CANVAS_W;
+statCanvas.height = STAT_CANVAS_H;
 var statTimeRange = document.getElementById("statTimeRange");
 var statTimeText = document.getElementById("statTimeText");
 var statToolTip = document.getElementById("statToolTip");
+var statTimeUnitDiv = document.getElementById("statTimeUnit");
+
+
+var dateMmYy = function(date, sep="-") {
+    var mm = date.getMonth() + 1;
+    return [(mm>9 ? "" : "0") + mm,
+            date.getFullYear()%100
+           ].join(sep);
+};
+
+var dateDdMmYy = function(date, sep="-") {
+    var mm = date.getMonth() + 1;
+    var dd = date.getDate();
+    return [(dd>9 ? "" : "0") + dd,
+            (mm>9 ? "" : "0") + mm,
+            date.getFullYear()%100
+           ].join(sep);
+};
+
+var dateDdMmHh = function(date) {
+    var mm = date.getMonth() + 1;
+    var dd = date.getDate();
+    var hh = date.getHours();
+    var minMin = date.getMinutes();
+    return (dd>9 ? "" : "0") + dd + ""+
+            (mm>9 ? "" : "0") + mm +" "+
+            (hh>9 ? "" : "0") + hh;
+};
+
+var dateDdMmHhMm = function(date) {
+    var mm = date.getMonth() + 1;
+    var dd = date.getDate();
+    var hh = date.getHours();
+    var minMin = date.getMinutes();
+    return (dd>9 ? "" : "0") + dd + ""+
+            (mm>9 ? "" : "0") + mm +" "+
+            (hh>9 ? "" : "0") + hh +":"+
+            (minMin>9 ? "" : "0") + minMin;
+};
+
 
 var getPostsPerDay = function(posts, days) {
     
@@ -347,8 +394,128 @@ var getPostsPerDay = function(posts, days) {
     
 };
 
+/** info for different time units,
+* name,
+* how many milliseconds it is,
+* a function for getting a string value of a date to use,
+* a function giving the a date to use as upper bound (and where to subtract values to get previous dates)
+*/
+var TIME_UNIT_DATA = {
+    "tenMinutes": {
+        name: "10 minuuttia",
+        nameShowAtRange: "10 minuuttista",
+        inMs: 1000*60*10,
+        dateToStr: dateDdMmHhMm,
+        getCurrUpBoundDate: function() {
+            var d = new Date();
+            d.setSeconds(59);
+            d.setMilliseconds(999);
+            return d;
+        }
+    },
+    "hour": {
+        "name": "tunti",
+        nameShowAtRange: "tuntia",
+        inMs: 1000*60*60,
+        dateToStr: dateDdMmHh,
+        getCurrUpBoundDate: function() {
+            var d = new Date();
+            d.setMinutes(59);
+            d.setSeconds(59);
+            d.setMilliseconds(999);
+            return d;
+        }
+    },
+    "day": {
+        name: "päivä",
+        nameShowAtRange: "päivää",
+        inMs: 1000*60*60*24,
+        dateToStr: dateDdMmYy,
+        getCurrUpBoundDate: function() {
+            var d = new Date();
+            d.setHours(23);
+            d.setMinutes(59);
+            d.setSeconds(59);
+            d.setMilliseconds(999);
+            return d;
+        }
+    },
+    "month": {
+        name: "kuukausi",
+        nameShowAtRange: "kuukautta",
+        inMs: 1000*60*60*24*(7*31+4*30+28+1*0.25*0.99)/12, //month average days (with leap years too)
+        dateToStr: dateMmYy,
+        getCurrUpBoundDate: function() {
+            var d = new Date();
+            d.setMonth(d.getMonth()+1);
+            d.setDate(1);
+            d.setHours(0);
+            d.setMinutes(0);
+            d.setSeconds(0);
+            d.setSeconds(-1); //makes the last of last month
+            d.setMilliseconds(999);
+            return d;
+        }
+    },
+};
+
+
+
+//TODO better way: for each post get the ind (=date group) it will be,
+//     then have only bars that have positive number of posts
+//     and when drawing get the x-position from the date (given low and up dates)
+var getPostsPerTimeUnit = function(posts, timeUnit, bars) {
+    let tUD = TIME_UNIT_DATA[timeUnit] || TIME_UNIT_DATA["day"];
+    var currDate = tUD.getCurrUpBoundDate();
+    var dateToStr = tUD.dateToStr;
+    var UNIT_IN_MS = tUD.inMs;
+    /*
+    switch (timeUnit) {
+        case "tenMinutes":
+            //here just have 10 minute intervals, not necess 0:00, 10:00, 20:00,...
+            break;
+        case "hour":
+            currDate.setMinutes(59);
+            break;
+        case "day":
+            currDate.setHours(23);
+            currDate.setMinutes(59);
+            dateToStr = dateDdMmYY;
+            break;
+        case "month":
+            currDate.setMonth(currDate.getMonth()+1);
+            currDate.setDate(1);
+            currDate.setHours(0);
+            currDate.setMinutes(0);
+            currDate.setSeconds(0);
+            currDate.setSeconds(-1); //makes the last of last month
+            break;
+    }
+    
+    currDate.setSeconds(59);
+    currDate.setMilliseconds(999);
+    */
+    
+    var dateNowInt = new Date()-0;
+    var res = new Array(bars).fill(null).map((_,i)=>{
+        var dateForOb = new Date(dateNowInt - (bars-1-i)*UNIT_IN_MS);
+        return {postCount:0, date:dateForOb, dateStr: dateToStr(dateForOb)};
+    });
+    
+    for (let post of posts) {
+        let unitsAgo = ((currDate-post.date)/UNIT_IN_MS)|0;
+        if (unitsAgo<res.length && unitsAgo>=0) { //don't count posts in future, either :)
+            res[res.length-1-unitsAgo].postCount += 1; //order so that last is the current
+        }
+    }
+    return res;
+    
+};
+
+
 
 var getDaysAgo = function(date) {
+    
     var currDate = new Date();
     currDate.setHours(23);
     currDate.setMinutes(59);
@@ -357,27 +524,40 @@ var getDaysAgo = function(date) {
     return ((currDate-date)/MS_PER_DAY)|0;
 };
 
-var dateDdMmYy = function(date, sep="-") {
-  var mm = date.getMonth() + 1;
-  var dd = date.getDate();
-  return [(dd>9 ? "" : "0") + dd,
-          (mm>9 ? "" : "0") + mm,
-          date.getFullYear()%100
-         ].join(sep);
+var getTimeUnitsAgo = function(date, timeUnit) {
+    var tUD = TIME_UNIT_DATA[timeUnit] || TIME_UNIT_DATA["day"];
+    var currDate = tUD.getCurrUpBoundDate();
+    var MS_PER_UNIT = tUD.inMs;
+    return ((currDate-date)/MS_PER_UNIT)|0;
 };
+
 
 var max = arr => Math.max.apply(Math, arr);
 
 /** How many x-values to label when there are days many bars */
 var getXStepsForDays = function(days) {
     //steps means that there are +1 labels drawn
-    
+    if (bars===0) return -1; //no steps if no bars
     if (days<=5) return days+1; //can fit for every day
     if (days<=7) return 2;
     if (days===8) return 3;
     if (days===9) return 4;
     if (days<=12) return 3;
     return 4;
+};
+
+/** How many x-values to label when there are days many bars */
+var getXStepsForTimeUnits = function(bars, timeUnit) {
+    //steps means that there are +1 labels drawn
+    if (bars===0) return -1; //no steps if no bars
+    if (bars<=5) return bars+1; //can fit for every day
+    if (bars<=7) return 2;
+    if (bars===8) return 3;
+    if (bars===9) return 4;
+    if (bars<=12) return 3;
+    return 4;
+    
+    //TODO
 };
 
 
@@ -389,12 +569,13 @@ var barChartVars = { //this will be set in draw
     y1: 0,
     x1: 0,
     barW: 0,
-    postsPerDay: []
+    postsPerUnit: []
 };
 
 var getOnBar = function(x, y) {
+    console.log("getting with "+x+", "+y);
     if (barChartVars.x0<=x && x<=barChartVars.x1 && barChartVars.y1<=y && y<=barChartVars.y0) {
-        return barChartVars.postsPerDay[((x-barChartVars.x0)/barChartVars.barW)|0];
+        return barChartVars.postsPerUnit[((x-barChartVars.x0)/barChartVars.barW)|0];
     }
     return null;
 };
@@ -406,26 +587,32 @@ var drawStat = function() {
     var w = statCanvas.width;
     var h = statCanvas.height;
     ctx.clearRect(0,0,w,h);
-    var days = posts.length ? (getDaysAgo(posts[0].date)+1) : 1;
-    var maxDays = +statTimeRange.value;
-    if (days>maxDays) days = maxDays;
-    console.log("days = "+days, typeof days);
-    var postsPerDay = barChartVars.postsPerDay = getPostsPerDay(posts, days);
+    //TODO varying time unit
+    var timeUnitToUse = statTimeUnitDiv.getSelectedValue();
+    let barsNotSliced = posts.length ? (getTimeUnitsAgo(posts[0].date, timeUnitToUse)+1) : 1;
+    var maxBars = +statTimeRange.value;
+    if (barsNotSliced>maxBars) barsNotSliced = maxBars;
+    let postsNotSliced = getPostsPerTimeUnit(posts, timeUnitToUse, barsNotSliced);
+    var postsPerUnit = barChartVars.postsPerUnit = postsNotSliced.slice(0, barsNotSliced);
+    //TODO get lower-slice from
+    var bars = postsPerUnit.length;
+    
+    console.log("time unit = "+timeUnitToUse);
+    console.log("bars = "+bars, typeof bars);
     
     var y0 = barChartVars.y0 = h-30;
     var x0 = barChartVars.x0 = 30;
     var y1 = barChartVars.y1 = 10;
     var x1 = barChartVars.x1 = w-20;
-    var barW = barChartVars.barW = (x1-x0)/days;
+    var barW = barChartVars.barW = (x1-x0)/bars;
     var drawBarW = Math.max(barW, 1); //draw at least 1px bars
-    var maxP = max(postsPerDay.map(({postCount})=>postCount));
+    var maxP = max(postsPerUnit.map(({postCount})=>postCount));
     var sclY = (y0-y1)/(maxP||1);
-    var y=50;
-    var x = x0;
     ctx.fillStyle = "#00ff60";
     ctx.strokeStyle = "#222222";
     ctx.lineWidth = 1;
-    for (let ob of postsPerDay) {
+    var x = x0;
+    for (let ob of postsPerUnit) {
         let yTop = y0-(sclY*ob.postCount);
         let barH = y0 -yTop;
         
@@ -472,14 +659,14 @@ var drawStat = function() {
     ctx.textBaseline = "top";
     var marginXAxis = 5;
     ctx.fillStyle = "#000000";
-    var xSteps = getXStepsForDays(days);
-    console.log("got "+xSteps+" x-steps for "+days);
+    var xSteps = getXStepsForTimeUnits(bars, timeUnitToUse);
+    console.log("got "+xSteps+" x-steps for "+bars);
     for (let i=0; i<=xSteps; i++) {
         let per = i/xSteps;
         let xCoord = x0 + (x1-x0)*per;
-        var indForDate = Math.floor((postsPerDay.length-1)*per);
-        let xVal = dateDdMmYy(postsPerDay[indForDate].date);
-        ctx.fillText(xVal, x0+barW*(indForDate+0.5), y0+marginXAxis); //center for bar at ind
+        let indForUnit = Math.floor((postsPerUnit.length-1)*per);
+        let xVal = postsPerUnit[indForUnit].dateStr;
+        ctx.fillText(xVal, x0+barW*(indForUnit+0.5), y0+marginXAxis); //center for bar at ind
     }
 };
 
@@ -489,7 +676,7 @@ statCanvas.onmousemove = function(evt) {
     var y = evt.clientY-statCanvas.offsetTop;
     var onBar = getOnBar(x, y);
     if (onBar) {
-        statToolTip.innerHTML = "<span class='date'>"+dateDdMmYy(onBar.date)+"</span><br>"
+        statToolTip.innerHTML = "<span class='date'>"+onBar.dateStr+"</span><br>"
             +"<span class='postCount'>"+onBar.postCount+"</span>";
         statToolTip.style.display = "block";
         if (evt.clientX<150) {
@@ -509,8 +696,23 @@ statCanvas.onmouseout = function(evt) {
 };
 
 var updateStatText = function() {
-    statTimeText.innerHTML = "<span class='daysNumber'>"+statTimeRange.value+"</span> päivää";
-}
+    var tUnit = statTimeUnitDiv.getSelectedValue();
+    statTimeText.innerHTML = "<span class='daysNumber'>"+statTimeRange.value+"</span> "+
+        TIME_UNIT_DATA[tUnit].nameShowAtRange;
+};
+
+var prevTimeUnitSelection = "day"; //store for keeping value in same time
+var updateTimeRange = function() {
+    var tUnit = statTimeUnitDiv.getSelectedValue();
+    var coeff = TIME_UNIT_DATA[prevTimeUnitSelection].inMs / TIME_UNIT_DATA[tUnit].inMs
+    var valToSet = Math.round( (+statTimeRange.value)*coeff );
+    statTimeRange.max = postsForStat[0] ? getTimeUnitsAgo(postsForStat[0].date, tUnit)+1 : 1;
+    statTimeRange.value = valToSet;
+    prevTimeUnitSelection = tUnit;
+    
+    //TODO controls for lower and upper bound both
+    
+};
 
 statTimeRange.oninput = function() {
     updateStatText();
@@ -518,11 +720,29 @@ statTimeRange.oninput = function() {
 };
 
 
+
+statTimeUnitDiv.getSelectedValue = function() {
+    for (let c of this.getElementsByTagName("input")) {
+        if (c.checked) return c.value;
+    }
+    return "";
+};
+
+
+for (let c of statTimeUnitDiv.getElementsByTagName("input")) {
+    c.oninput = function() {
+        updateTimeRange();
+        updateStatText();
+        drawStat();
+    }
+}
+
+
 /* this can be done with response function, since not gotten from storage */
 sendMsg({getPostsStat: true}, function(statData) {
     if (statData) {
         postsForStat = statData.map(ob=>{return {username: ob.username, date: new Date(ob.date)}});
-        statTimeRange.max = postsForStat[0] ? getDaysAgo(postsForStat[0].date)+1 : 1;
+        updateTimeRange();
         updateStatText();
         drawStat();
     }
