@@ -481,4 +481,32 @@ var postIndexClickHandler = evt=>{
 };
 postIndexInfo.addEventListener("click", postIndexClickHandler);
 
-//TODO swear word filter
+
+
+
+var readHideAlwaysNamesFile = function(onOK) {
+    var hideReq = new XMLHttpRequest();
+    hideReq.open('GET', chrome.extension.getURL('hideAlwaysNames.txt'), true);
+    hideReq.onreadystatechange = function() {
+        if (hideReq.readyState == XMLHttpRequest.DONE && hideReq.status == 200) {
+            var arrOfUsers = JSON.parse(hideReq.responseText);
+            if (typeof onOK === "function") onOK(arrOfUsers);
+        }
+    };
+    hideReq.send();
+};
+
+/* save manually
+var saveHideAlwaysNamesFile = function(userNames) {
+    
+};
+*/
+
+
+//read names to hide from file
+readHideAlwaysNamesFile(function(res) {
+    removeUsersPosts(res);
+    addUsersToRemoveAlways(res);
+});
+
+

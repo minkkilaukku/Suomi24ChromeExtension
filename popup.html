@@ -5,7 +5,8 @@
     <meta name="viewport" content="width=device-width">
     <title>Suomi24 Extension</title>
     
-    <link rel="stylesheet" href="popupStyle2.css" type="text/css">
+    <link rel="stylesheet" href="css/popupStyle2.css" type="text/css">
+    <link rel="stylesheet" href="css/twoButtonSlider.css" type="text/css">
     <!--link rel="stylesheet" href="auto-complete.css" type="text/css"-->
     
 </head>
@@ -42,7 +43,10 @@
         
     </label>
     <button id="clearAlwaysRemoveButton">Tyhjennä aina-poistettavat</button>
-        
+    
+    <br>
+    <button id="downloadHideAlwaysNames">Lataa nimet tiedostona</button>
+    <a id="downloadHideAlwaysNamesLink" download="hideAlwaysNames.txt" style="display: none;"></a>
     </div>
     
     
@@ -93,7 +97,9 @@
         <label>
             Näytä tilasto ajalta
             <br>
-            <input id="statTimeRange" type="range" min="1" max="360" value="30">
+            <input id="statTimeRange" type="range" min="1" max="360" value="30" style="display: none;">
+            <br>
+            <span id="twoButtonSliderHolder"></span>
         </label>
         <span id="statTimeText"><span class="daysNumber">30</span> päivää</span>
         <br>
@@ -116,5 +122,6 @@
     
     
     <!--script src="auto-complete-min.js"></script-->
-    <script src="popup.js"></script>
+    <script src="js/twoButtonSlider.js"></script>
+    <script src="js/popup.js"></script>
 </body>

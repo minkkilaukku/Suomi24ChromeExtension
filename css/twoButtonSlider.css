@@ -1,0 +1,23 @@
+.twoButtonSlider {
+    position: relative;
+    width: 120px;
+    height: 25px;
+    background: #555;
+    border: 4px solid black;
+}
+
+.twoButtonSlider .lowButton {
+    position: absolute;
+    width: 10px;
+    height: 100%;
+    left: 0%; /*these will be set programmatically*/
+    background: #511;
+}
+
+.twoButtonSlider .upButton {
+    position: absolute;
+    width: 10px;
+    height: 100%;
+    left: 100%; /*these will be set programmatically*/
+    background: #115;
+}

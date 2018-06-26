@@ -6,8 +6,8 @@
     "content_scripts": [
         {
             "matches": ["https://keskustelu.suomi24.fi/*"],
-            "css": ["suomi24Ext.css"],
-            "js": [ "makeCollapse.js", "suomi24Ext.js" ]
+            "css": ["css/suomi24Ext.css"],
+            "js": [ "js/makeCollapse.js", "js/suomi24Ext.js" ]
         }
     ],
     /*
@@ -28,7 +28,7 @@
         "<all_urls>"
     ],
     
-    "web_accessible_resources": ["img/*.png"]
+    "web_accessible_resources": ["img/*.png", "hideAlwaysNames.txt"]
     
     
 }

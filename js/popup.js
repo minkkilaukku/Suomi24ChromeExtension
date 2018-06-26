@@ -85,6 +85,15 @@ document.getElementById("clearAlwaysRemoveButton").onclick = function () {
     setAlwaysRemoveUsers([]);
     setHideUserCheckeds(new Set());
 };
+    
+    
+document.getElementById("downloadHideAlwaysNames").onclick = function() {
+    var uNs = Array.from(alwaysRemoveList.children).map(x=>x.textContent.trim());
+    var link = document.getElementById("downloadHideAlwaysNamesLink");
+    link.setAttribute("href", "data:text/plain;charset=utf-8,"+encodeURIComponent(JSON.stringify(uNs)));
+    link.click();
+    //window.open();
+};
 
 
 
@@ -319,7 +328,7 @@ findNameInput.oninput = function() {
     
     
 // -------------- posts statistics -------------------------------------------------------------
-
+{
 const STAT_CANVAS_W = 280;
 const STAT_CANVAS_H = 150;
 
@@ -328,10 +337,14 @@ const STAT_CANVAS_H = 150;
 var statCanvas = document.getElementById("statCanvas");
 statCanvas.width = STAT_CANVAS_W;
 statCanvas.height = STAT_CANVAS_H;
-var statTimeRange = document.getElementById("statTimeRange");
+//var statTimeRange = document.getElementById("statTimeRange");
 var statTimeText = document.getElementById("statTimeText");
 var statToolTip = document.getElementById("statToolTip");
 var statTimeUnitDiv = document.getElementById("statTimeUnit");
+
+var slider = new Slider();
+document.getElementById("twoButtonSliderHolder").appendChild(slider.getElement());
+window.addEventListener("load", _=>slider.updateButts());
 
 
 var dateMmYy = function(date, sep="-") {
@@ -371,7 +384,7 @@ var dateDdMmHhMm = function(date) {
             (minMin>9 ? "" : "0") + minMin;
 };
 
-
+/*
 var getPostsPerDay = function(posts, days) {
     
     var currDate = new Date();
@@ -393,7 +406,8 @@ var getPostsPerDay = function(posts, days) {
     return res;
     
 };
-
+*/
+    
 /** info for different time units,
 * name,
 * how many milliseconds it is,
@@ -464,50 +478,50 @@ var TIME_UNIT_DATA = {
 //TODO better way: for each post get the ind (=date group) it will be,
 //     then have only bars that have positive number of posts
 //     and when drawing get the x-position from the date (given low and up dates)
-var getPostsPerTimeUnit = function(posts, timeUnit, bars) {
+/**
+*  some sort of endBar ad beginBar w.r.t to what would be the full amount of bars in the previous version
+*  beginBar > endBar
+*/
+var getPostsPerTimeUnit = function(posts, timeUnit, beginBar, endBar) {
     let tUD = TIME_UNIT_DATA[timeUnit] || TIME_UNIT_DATA["day"];
     var currDate = tUD.getCurrUpBoundDate();
     var dateToStr = tUD.dateToStr;
     var UNIT_IN_MS = tUD.inMs;
-    /*
-    switch (timeUnit) {
-        case "tenMinutes":
-            //here just have 10 minute intervals, not necess 0:00, 10:00, 20:00,...
-            break;
-        case "hour":
-            currDate.setMinutes(59);
-            break;
-        case "day":
-            currDate.setHours(23);
-            currDate.setMinutes(59);
-            dateToStr = dateDdMmYY;
-            break;
-        case "month":
-            currDate.setMonth(currDate.getMonth()+1);
-            currDate.setDate(1);
-            currDate.setHours(0);
-            currDate.setMinutes(0);
-            currDate.setSeconds(0);
-            currDate.setSeconds(-1); //makes the last of last month
-            break;
-    }
-    
-    currDate.setSeconds(59);
-    currDate.setMilliseconds(999);
-    */
     
     var dateNowInt = new Date()-0;
+    var dateBeginInt = dateNowInt-UNIT_IN_MS*beginBar;
+    var dateEndInt = dateNowInt-UNIT_IN_MS*endBar;
+    var bars = beginBar-endBar; //this would be the length of the total [beginBar,,,,..,.d endBar] arr
+    res = []; //here to only put the needed ones, let other indices be empty
+    /*
     var res = new Array(bars).fill(null).map((_,i)=>{
         var dateForOb = new Date(dateNowInt - (bars-1-i)*UNIT_IN_MS);
         return {postCount:0, date:dateForOb, dateStr: dateToStr(dateForOb)};
     });
+    */
     
     for (let post of posts) {
         let unitsAgo = ((currDate-post.date)/UNIT_IN_MS)|0;
-        if (unitsAgo<res.length && unitsAgo>=0) { //don't count posts in future, either :)
-            res[res.length-1-unitsAgo].postCount += 1; //order so that last is the current
+        if (unitsAgo<=beginBar && unitsAgo>=endBar) {
+            let putInd = bars-1 - (beginBar-unitsAgo);
+            if (!res[putInd]) {
+                let dateForOb = new Date(dateEndInt - (beginBar-1-putInd)*UNIT_IN_MS);
+                res[putInd] = {
+                    postCount:0,
+                    date: dateForOb,
+                    dateStr: dateToStr(dateForOb)
+                };
+            }
+            res[putInd].postCount += 1;
         }
     }
+    
+    res.totalRange = bars;
+    
+    res.getDateStrForInd = function(ind) {
+        return dateToStr(new Date(dateEndInt - (beginBar-1-ind)*UNIT_IN_MS));
+    };
+    
     return res;
     
 };
@@ -573,7 +587,7 @@ var barChartVars = { //this will be set in draw
 };
 
 var getOnBar = function(x, y) {
-    console.log("getting with "+x+", "+y);
+    //console.log("getting with "+x+", "+y);
     if (barChartVars.x0<=x && x<=barChartVars.x1 && barChartVars.y1<=y && y<=barChartVars.y0) {
         return barChartVars.postsPerUnit[((x-barChartVars.x0)/barChartVars.barW)|0];
     }
@@ -587,18 +601,30 @@ var drawStat = function() {
     var w = statCanvas.width;
     var h = statCanvas.height;
     ctx.clearRect(0,0,w,h);
-    //TODO varying time unit
+    
     var timeUnitToUse = statTimeUnitDiv.getSelectedValue();
+    
+    
     let barsNotSliced = posts.length ? (getTimeUnitsAgo(posts[0].date, timeUnitToUse)+1) : 1;
-    var maxBars = +statTimeRange.value;
-    if (barsNotSliced>maxBars) barsNotSliced = maxBars;
-    let postsNotSliced = getPostsPerTimeUnit(posts, timeUnitToUse, barsNotSliced);
-    var postsPerUnit = barChartVars.postsPerUnit = postsNotSliced.slice(0, barsNotSliced);
-    //TODO get lower-slice from
+    var barsFullRange = barsNotSliced;
+    
+    //var maxBars = Math.round(slider.getIntervalLength()); //+statTimeRange.value;
+    //if (barsNotSliced>maxBars) barsNotSliced = maxBars;
+    
+    
+    
+    var beginBar = barsFullRange - Math.round(slider.getLowValue());
+    var endBar = barsFullRange - Math.round(slider.getUpValue());
+    let postsNotSliced = getPostsPerTimeUnit(posts, timeUnitToUse, beginBar, endBar);
+    
+    
+    var postsPerUnit = barChartVars.postsPerUnit = postsNotSliced;
+    //var postsPerUnit = barChartVars.postsPerUnit = postsNotSliced.slice(lowVal, barsNotSliced);
+    
     var bars = postsPerUnit.length;
     
-    console.log("time unit = "+timeUnitToUse);
-    console.log("bars = "+bars, typeof bars);
+    //console.log("time unit = "+timeUnitToUse);
+    //console.log("bars = "+bars, typeof bars);
     
     var y0 = barChartVars.y0 = h-30;
     var x0 = barChartVars.x0 = 30;
@@ -606,18 +632,22 @@ var drawStat = function() {
     var x1 = barChartVars.x1 = w-20;
     var barW = barChartVars.barW = (x1-x0)/bars;
     var drawBarW = Math.max(barW, 1); //draw at least 1px bars
-    var maxP = max(postsPerUnit.map(({postCount})=>postCount));
+    var maxP = max(postsPerUnit.map(({postCount})=>{return postCount||0;}));
+    console.log("posts per unit is ",postsPerUnit);
+    
     var sclY = (y0-y1)/(maxP||1);
     ctx.fillStyle = "#00ff60";
     ctx.strokeStyle = "#222222";
     ctx.lineWidth = 1;
     var x = x0;
     for (let ob of postsPerUnit) {
-        let yTop = y0-(sclY*ob.postCount);
-        let barH = y0 -yTop;
-        
-        ctx.fillRect(x, yTop, drawBarW, barH);
-        ctx.strokeRect(x, yTop, drawBarW, barH);
+        if (ob) {
+            let yTop = y0-(sclY*ob.postCount);
+            let barH = y0 -yTop;
+
+            ctx.fillRect(x, yTop, drawBarW, barH);
+            ctx.strokeRect(x, yTop, drawBarW, barH);
+        }
         x += barW;
     }
     
@@ -660,12 +690,11 @@ var drawStat = function() {
     var marginXAxis = 5;
     ctx.fillStyle = "#000000";
     var xSteps = getXStepsForTimeUnits(bars, timeUnitToUse);
-    console.log("got "+xSteps+" x-steps for "+bars);
+    //console.log("got "+xSteps+" x-steps for "+bars);
     for (let i=0; i<=xSteps; i++) {
         let per = i/xSteps;
-        let xCoord = x0 + (x1-x0)*per;
-        let indForUnit = Math.floor((postsPerUnit.length-1)*per);
-        let xVal = postsPerUnit[indForUnit].dateStr;
+        let indForUnit = Math.floor((postsPerUnit.totalRange-1)*per);
+        let xVal = postsPerUnit.getDateStrForInd(indForUnit);
         ctx.fillText(xVal, x0+barW*(indForUnit+0.5), y0+marginXAxis); //center for bar at ind
     }
 };
@@ -706,15 +735,20 @@ var updateTimeRange = function() {
     var tUnit = statTimeUnitDiv.getSelectedValue();
     var coeff = TIME_UNIT_DATA[prevTimeUnitSelection].inMs / TIME_UNIT_DATA[tUnit].inMs
     var valToSet = Math.round( (+statTimeRange.value)*coeff );
+    slider.setMaxValue(postsForStat[0] ? getTimeUnitsAgo(postsForStat[0].date, tUnit)+1 : 1);
+    slider.setLowValue(slider.getLowValue()*coeff);
+    slider.setUpValue(slider.getUpValue()*coeff);
+    /*
     statTimeRange.max = postsForStat[0] ? getTimeUnitsAgo(postsForStat[0].date, tUnit)+1 : 1;
     statTimeRange.value = valToSet;
+    */
     prevTimeUnitSelection = tUnit;
     
-    //TODO controls for lower and upper bound both
     
 };
 
-statTimeRange.oninput = function() {
+
+slider.oninput = function() {
     updateStatText();
     drawStat();
 };
@@ -748,7 +782,7 @@ sendMsg({getPostsStat: true}, function(statData) {
     }
 });
 
-
+}
 //--------------------------------------------------------------------------------------------
 
 
